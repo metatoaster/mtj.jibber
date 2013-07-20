@@ -4,3 +4,4 @@
 *.py[co]
 .*.swp
 .env
+*config.json
