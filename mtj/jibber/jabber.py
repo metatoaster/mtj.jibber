@@ -9,6 +9,8 @@ from mtj.jibber.core import BotCore
 from mtj.jibber.core import MucBotCore
 from mtj.jibber.bot import Command
 
+from mtj.jibber.utils import strip_tags
+
 logger = logging.getLogger('mtj.jibber.jabber')
 
 
@@ -113,10 +115,17 @@ class MucChatBot(MucBotCore):
             # Okay we finally have a match.
             matched += 1
 
-            # TODO deal with HTML messages.
-            reply_txt = str(raw_reply)
+            # TODO make a better way to determine if HTML.
+            if (raw_reply.startswith('<p>') or
+                    raw_reply.startswith('<html>') or
+                    raw_reply.startswith('<!')):
+                reply_html = str(raw_reply)
+                reply_txt = strip_tags(raw_reply)
+            else:
+                reply_html = None
+                reply_txt = raw_reply
 
             self.client.send_message(mtype='groupchat', mto=msg['mucroom'],
                 mbody=reply_txt,
-                #mhtml=reply_html,
+                mhtml=reply_html,
             )
