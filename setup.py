@@ -29,6 +29,7 @@ setup(name='mtj.jibber',
       install_requires=[
           'setuptools',
           # -*- Extra requirements: -*-
+          'sleekxmpp',
       ],
       entry_points="""
       # -*- Entry points: -*-
