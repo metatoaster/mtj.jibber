@@ -81,3 +81,13 @@ class BotCore(object):
 
         self.client.disconnect()
         self.client = None
+
+    # shared setup methods
+
+    def setup_plugins(self, client, plugins):
+        for plugin in plugins:
+            client.register_plugin(plugin)
+
+    def setup_events(self, client, events):
+        for event, handler in events:
+            client.add_event_handler(event, handler)

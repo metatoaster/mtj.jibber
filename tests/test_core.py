@@ -77,3 +77,24 @@ class BotTestCase(TestCase):
 
         bot.disconnect()
         self.assertTrue(bot.client is None)
+
+    def test_setup_methods(self):
+        class TestClient(object):
+            def __init__(self, *a, **kw):
+                self.plugins = []
+                self.events = []
+            def register_plugin(self, plugin):
+                self.plugins.append(plugin)
+            def add_event_handler(self, *a):
+                self.events.append(a)
+
+        def dummy():
+            pass
+
+        bot = BotCore()
+        client = TestClient()
+        bot.setup_plugins(client, ['test', 'one'])
+        self.assertEqual(client.plugins, ['test', 'one'])
+
+        bot.setup_events(client, [('setup', dummy)])
+        self.assertEqual(client.events, [('setup', dummy)])
