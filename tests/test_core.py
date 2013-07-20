@@ -65,3 +65,6 @@ class BotTestCase(TestCase):
 
         bot.disconnect()
         self.assertTrue(bot.client is None)
+
+        bot.disconnect()
+        self.assertTrue(bot.client is None)

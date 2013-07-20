@@ -52,5 +52,8 @@ class BotCore(object):
         self.client = client
 
     def disconnect(self):
+        if self.client is None:
+            return
+
         self.client.disconnect()
         self.client = None
