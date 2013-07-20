@@ -10,7 +10,7 @@ try:
 except ImportError:
     pass
 
-from mtj.jibber.jabber import MucBotCore
+from mtj.jibber.jabber import MucChatBot
 
 # Python versions before 3.0 do not use UTF-8 encoding
 # by default. To ensure that Unicode is handled properly
@@ -27,7 +27,7 @@ logging.basicConfig(level='INFO',
 
 logger = logging.getLogger('jibber')
 
-bot = MucBotCore()
+bot = MucChatBot()
 
 argv = list(reversed(sys.argv[1:]))
 if not argv:

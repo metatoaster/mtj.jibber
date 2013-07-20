@@ -117,7 +117,7 @@ class MucBotCore(BotCore):
 
     def join_rooms(self, event):
         rooms = self.config.get('rooms', [])
-        nickname = self.config.get('nickname', self.client.boundjid.user)
+        self.nickname = self.config.get('nickname', self.client.boundjid.user)
 
         for room in rooms:
-            self.muc.joinMUC(room, nickname, wait=True)
+            self.muc.joinMUC(room, self.nickname, wait=True)
