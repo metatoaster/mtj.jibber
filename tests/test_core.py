@@ -38,6 +38,15 @@ class BotTestCase(TestCase):
             '"host": "talk.example.com", "port": 52222}')
         self.assertEqual(bot.address, ('talk.example.com', 52222))
 
+    def test_bot_client_config(self):
+        bot = BotCore()
+        bot.load_client_config('{"test": "1234"}')
+        self.assertEqual(bot.config, {'test': '1234'})
+        bot.load_client_config('{"test": "12345"}')
+        self.assertEqual(bot.config, {'test': '12345'})
+        bot.load_client_config('{"key": ["a", "b"]}')
+        self.assertEqual(bot.config, {'test': '12345', 'key': ['a', 'b']})
+
     def test_connect(self):
         class TestClient(object):
             def __init__(self, *a, **kw):

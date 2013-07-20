@@ -28,6 +28,7 @@ class BotCore(object):
         self.port = 5222
 
         self.client = None
+        self.config = {}
 
         if s_config is not None:
             self.load_server_config(s_config)
@@ -53,7 +54,7 @@ class BotCore(object):
         return (self.host, self.port)
 
     def load_client_config(self, c_config):
-        self.config = json.loads(s_config)
+        self.config.update(json.loads(c_config))
 
     def setup_client(self, client):
         """
