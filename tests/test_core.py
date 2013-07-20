@@ -1,6 +1,7 @@
 from unittest import TestCase
 
 from mtj.jibber.core import BotCore
+from mtj.jibber.core import MucBotCore
 
 
 class BotTestCase(TestCase):
@@ -98,3 +99,35 @@ class BotTestCase(TestCase):
 
         bot.setup_events(client, [('setup', dummy)])
         self.assertEqual(client.events, [('setup', dummy)])
+
+
+class MucBotTestCase(TestCase):
+
+    def setUp(self):
+        pass
+
+    def teatDown(self):
+        pass
+
+    def test_join_rooms(self):
+        class TestMuc(object):
+            rooms = []
+            def joinMUC(self, room, nickname, **kw):
+                self.rooms.append((nickname, room))
+        class TestClient(object):
+            boundjid = type('dummy', (object,), {'user': 'dummy'})
+
+        bot = MucBotCore()
+        bot.muc = TestMuc()
+        bot.client = TestClient
+
+        bot.config = {
+            'nickname': 'tester',
+            'rooms': ['testroom@chat.example.com', 'tester@chat.example.com'],
+        }
+
+        bot.join_rooms({})
+        self.assertEqual(TestMuc.rooms, [
+            ('tester', 'testroom@chat.example.com'),
+            ('tester', 'tester@chat.example.com'),
+        ])

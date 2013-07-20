@@ -91,3 +91,33 @@ class BotCore(object):
     def setup_events(self, client, events):
         for event, handler in events:
             client.add_event_handler(event, handler)
+
+
+class MucBotCore(BotCore):
+    """
+    The base jabber bot class.
+    """
+
+    def setup_client(self, client):
+        """
+        Client is a SleekXMPP client.
+        """
+
+        self.setup_plugins(client, [
+            'xep_0030',  # Service discovery
+            'xep_0045',  # Multi-User Chat
+            'xep_0199',  # XMPP Ping
+        ])
+
+        self.setup_events(client, [
+            ('session_start', self.join_rooms),
+        ])
+
+        self.muc = client.plugin['xep_0045']
+
+    def join_rooms(self, event):
+        rooms = self.config.get('rooms', [])
+        nickname = self.config.get('nickname', self.client.boundjid.user)
+
+        for room in rooms:
+            self.muc.joinMUC(room, nickname, wait=True)
