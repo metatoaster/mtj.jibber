@@ -1,0 +1,6 @@
+{
+    "jid": "username@example.com",
+    "password": "password",
+    "host": "talk.example.com",
+    "port": 5222
+}
