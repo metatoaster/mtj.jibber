@@ -51,18 +51,17 @@ class BotTestCase(TestCase):
                 pass
 
         bot = BotCore()
+        bot._client_cls = TestClient
         bot.load_server_config(
             '{"jid": "test@example.com/res", "password": "passwd"}')
-        self.assertTrue(bot.xmpp is None)
-
-        bot._client_cls = TestClient
-        bot.connect()
-
-        xmpp = bot.xmpp
-        self.assertFalse(bot.xmpp is None)
+        self.assertTrue(bot.client is None)
 
         bot.connect()
-        self.assertEqual(xmpp, bot.xmpp)
+        self.assertFalse(bot.client is None)
+
+        client = bot.client
+        bot.connect()
+        self.assertEqual(client, bot.client)
 
         bot.disconnect()
-        self.assertTrue(bot.xmpp is None)
+        self.assertTrue(bot.client is None)
