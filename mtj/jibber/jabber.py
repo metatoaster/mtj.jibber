@@ -7,7 +7,7 @@ from sleekxmpp import ClientXMPP
 
 from mtj.jibber.core import BotCore
 from mtj.jibber.core import MucBotCore
-from mtj.jibber.bot import Command
+from mtj.jibber.core import Command
 
 from mtj.jibber.utils import strip_tags
 
@@ -60,7 +60,7 @@ class MucChatBot(MucBotCore):
 
             if not issubclass(mod, Command):
                 logger.warning(
-                    'module `%s` is not a subclass of mtj.jibber.bot.Command',
+                    'module `%s` is not a subclass of mtj.jibber.core.Command',
                     name)
                 continue
 

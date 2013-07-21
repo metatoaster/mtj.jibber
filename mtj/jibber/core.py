@@ -121,3 +121,12 @@ class MucBotCore(BotCore):
 
         for room in rooms:
             self.muc.joinMUC(room, self.nickname, wait=True)
+
+
+class Command(object):
+    """
+    Core bot command class.
+    """
+
+    def __init__(self, *a, **kw):
+        pass

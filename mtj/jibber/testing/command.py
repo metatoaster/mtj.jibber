@@ -1,4 +1,4 @@
-from mtj.jibber.bot import Command
+from mtj.jibber.core import Command
 
 
 class Greeter(object):
