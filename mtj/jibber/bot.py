@@ -28,4 +28,4 @@ class Fortune(Command):
 
     def fortune(self, msg, match):
         fortune = self._fortune().strip()
-        return '%s: %s' % (msg['mucnick'], fortune)
+        return '<html><body>%s: %s</body></html>' % (msg['mucnick'], fortune)
