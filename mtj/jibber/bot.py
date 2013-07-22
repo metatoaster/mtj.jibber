@@ -5,7 +5,7 @@ from mtj.jibber.core import Command
 
 class FakeActions(Command):
 
-    punctuation = re.compile('[\.\?\!\,]$')
+    punctuation = re.compile('[\.\?\!\,]*$')
 
     def do_things(self, msg, match):
         """
