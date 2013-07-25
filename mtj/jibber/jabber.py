@@ -102,17 +102,27 @@ class MucChatBot(MucBotCore):
             if not match:
                 continue
 
-            f = getattr(self.objects[package], method)
-            raw_reply = f(msg, match)
-            if not raw_reply:
-                continue
+            if self.send_package_method(package, method, msg=msg, match=match,
+                    mto=msg['mucroom'], mtype='groupchat'):
+                # Okay we have a match.
+                matched += 1
 
-            # Okay we finally have a match.
-            matched += 1
-            self.send_message(mtype='groupchat', mto=msg['mucroom'],
-                raw=raw_reply,)
+    def send_package_method(self, package, method, **kwargs):
+        f = getattr(self.objects[package], method)
+        try:
+            msg = kwargs.pop('msg', {})
+            match = kwargs.pop('match', None)
+            raw_reply = f(msg=msg, match=match)
+        except:
+            logger.exception('Failed to send_package_method')
+            return
 
-    def send_message(self, mto, raw, **kwargs):
+        if isinstance(raw_reply, basestring):
+            self.send_message(raw=raw_reply, **kwargs)
+
+        return raw_reply
+
+    def send_message(self, raw, mto, **kwargs):
         # TODO make a better way to determine if HTML.
         if (raw.startswith('<p>') or raw.startswith('<html>') or
                 raw.startswith('<!')):
