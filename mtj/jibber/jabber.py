@@ -41,7 +41,7 @@ class MucChatBot(MucBotCore):
         This is a fairly unsafe method.  Check your configs source.
         """
 
-        self.objects = []
+        self.objects = {}
         self.commands = []
         self.commands_max_match = self.config.get('commands_max_match', 1)
 
@@ -53,27 +53,25 @@ class MucChatBot(MucBotCore):
             return
 
         for package in commands_packages:
-            name = package.get('package')
-            kwargs = package.get('kwargs', {})
-            ns, clsname = name.rsplit('.', 1)
-            mod = getattr(importlib.import_module(ns), clsname)
+            self.setup_command_package(**package)
 
-            if not issubclass(mod, Command):
-                logger.warning(
-                    'module `%s` is not a subclass of mtj.jibber.core.Command',
-                    name)
-                continue
+    def setup_command_package(self, package, kwargs, **configs):
+        ns, clsname = package.rsplit('.', 1)
+        cls = getattr(importlib.import_module(ns), clsname)
 
-            commands = package.get('commands')
-            obj = mod(**kwargs)
+        if not issubclass(cls, Command):
+            logger.warning(
+                'module `%s` is not a subclass of mtj.jibber.core.Command',
+                package)
+            return
 
-            self.setup_command_object(commands, obj)
+        self.objects[package] = cls(**kwargs)
+        self.setup_command_triggers(package, **configs)
 
-    def setup_command_object(self, commands, obj):
-
+    def setup_command_triggers(self, package, commands):
         for command in commands:
             try:
-                trigger, target = command
+                trigger, method = command
 
                 # this is to validate that this is a regex.
                 rawregex = trigger % {
@@ -81,20 +79,16 @@ class MucChatBot(MucBotCore):
                 }
                 regex = re.compile(rawregex, re.IGNORECASE)
 
-                f = getattr(obj, target)
-                self.commands.append((trigger, f))
+                self.commands.append((trigger, package, method))
             except:
                 logger.exception('%s is an invalid command', command)
-
-        # should have some sort of lookup table/reference for debugging?
-        self.objects.append(obj)
 
     def run_command(self, msg):
         if msg['mucnick'] == self.nickname:
             return
 
         matched = 0
-        for command, f in self.commands:
+        for command, package, method in self.commands:
             if matched >= self.commands_max_match:
                 break
 
@@ -108,6 +102,7 @@ class MucChatBot(MucBotCore):
             if not match:
                 continue
 
+            f = getattr(self.objects[package], method)
             raw_reply = f(msg, match)
             if not raw_reply:
                 continue
