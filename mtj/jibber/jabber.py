@@ -42,6 +42,7 @@ class MucChatBot(MucBotCore):
         """
 
         self.objects = {}
+        self.timers = {}
         self.commands = []
         self.commands_max_match = self.config.get('commands_max_match', 1)
 
@@ -67,8 +68,12 @@ class MucChatBot(MucBotCore):
 
         self.objects[package] = cls(**kwargs)
         self.setup_command_triggers(package, **configs)
+        self.setup_command_timers(package, **configs)
 
-    def setup_command_triggers(self, package, commands):
+    def setup_command_triggers(self, package, commands=None, **configs):
+        if not commands:
+            return
+
         for command in commands:
             try:
                 trigger, method = command
@@ -82,6 +87,56 @@ class MucChatBot(MucBotCore):
                 self.commands.append((trigger, package, method))
             except:
                 logger.exception('%s is an invalid command', command)
+
+    def setup_command_timers(self, package, timers=None, **configs):
+        """
+        Timers are in this format:
+
+            "timers": [
+                {
+                    "mtype": "groupchat",
+                    "mto": "testing@chat.example.com",
+                    "schedule": [
+                        {"seconds": 7200, "method": "say_hello"},
+                        {"seconds": 1800, "method": "report_time"}
+                    ]
+                }
+            ]
+
+        """
+
+        if not timers:
+            return
+
+        for timer in timers:
+            self.setup_schedule(package, **timer)
+
+    def setup_schedule(self, package, schedule, **msg_kwargs):
+        for schedule in schedule:
+            seconds = schedule['seconds']
+            method = schedule['method']
+            if not isinstance(seconds, int):
+                logger.error('the value `%s` is not an int',
+                    seconds.__repr__())
+                continue
+            self.timers[(package, method)] = (seconds, msg_kwargs)
+
+        for timer in self.timers.keys():
+            self.register_timer(timer)
+
+    def register_timer(self, args):
+        try:
+            self.client.scheduler.remove(str(args))
+        except ValueError:
+            pass
+        seconds, kwargs = self.timers[args]
+
+        # If the sleekxmpp _event_runner method actually can cope with
+        # the extra kwargs argument supported by the schedule method...
+        # Oh well, workaround works like this.  It's wrappers all the
+        # way down.
+        self.client.schedule(str(args), seconds, self.run_timer,
+            (self.send_package_method, args, kwargs), repeat=True)
 
     def run_command(self, msg):
         if msg['mucnick'] == self.nickname:
@@ -107,6 +162,9 @@ class MucChatBot(MucBotCore):
                 # Okay we have a match.
                 matched += 1
 
+    def run_timer(self, method, args, kwargs):
+        return method(*args, **kwargs)
+
     def send_package_method(self, package, method, **kwargs):
         f = getattr(self.objects[package], method)
         try:
@@ -119,6 +177,11 @@ class MucChatBot(MucBotCore):
 
         if isinstance(raw_reply, basestring):
             self.send_message(raw=raw_reply, **kwargs)
+
+        # reset the timer if it's in timer
+        # XXX some other method should do this check?
+        if self.timers.get((package, method)):
+            self.register_timer((package, method))
 
         return raw_reply
 

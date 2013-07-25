@@ -11,6 +11,9 @@ class Greeter(object):
 
         return 'hi %(mucnick)s' % msg
 
+    def say_hello_all(self, *a, **kw):
+        return 'hello all'
+
 
 class GreeterCommand(Command, Greeter):
     def __init__(self, *a, **kw):

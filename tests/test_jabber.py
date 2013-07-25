@@ -6,14 +6,26 @@ from mtj.jibber.jabber import MucChatBot
 class TestClient(object):
     def __init__(self):
         self.msg = []
+        self.schedules = []  # for checking all added timers
+        self.scheduler = []  # for mimicking the remove method
     def send_message(self, *a, **kw):
         self.msg.append(kw)
+    def schedule(self, name, seconds, *a, **kw):
+        self.schedules.append(name)
+        self.scheduler.append(name)
 
 
 class MucBotTestCase(TestCase):
 
     def setUp(self):
-        self.commands = [['^%(nickname)s: hi', 'say_hi']]
+        self.commands = [
+            ['^%(nickname)s: hi', 'say_hi'],
+            ['^%(nickname)s: hello', 'say_hello_all'],
+        ]
+        self.schedule = [
+            {'seconds': 7200, 'method': 'say_hello_all'},
+            {'seconds': 1800, 'method': 'report_time'},
+        ]
         self.kwargs = {}
         self.config = {
             'nickname': 'testbot',
@@ -24,6 +36,20 @@ class MucBotTestCase(TestCase):
                     'package': 'mtj.jibber.testing.command.GreeterCommand',
                     'commands': self.commands,
                 },
+
+                {
+                    'kwargs': self.kwargs,
+                    'package': 'mtj.jibber.testing.command.GreeterCommand',
+                    'timers': [
+                        {
+                            'mtype': 'groupchat',
+                            'mto': 'testing@chat.example.com',
+                            'schedule': self.schedule,
+                        },
+                    ],
+
+                },
+
             ]
         }
 
@@ -136,3 +162,36 @@ class MucBotTestCase(TestCase):
 
         self.assertEqual(bot.client.msg[0]['mbody'], "()")
         self.assertEqual(bot.client.msg[1]['mbody'], "{'arg1': 'test'}")
+
+    def test_muc_bot_timers(self):
+        bot = MucChatBot()
+        bot.client = TestClient()
+        bot.nickname = 'testbot'
+        bot.config = self.config
+        bot.setup_commands()
+
+        self.assertEqual(bot.timers, {
+            ('mtj.jibber.testing.command.GreeterCommand', 'say_hello_all'):
+                (7200, {
+                    'mtype': 'groupchat', 'mto': 'testing@chat.example.com',
+                }),
+            ('mtj.jibber.testing.command.GreeterCommand', 'report_time'):
+                (1800, {
+                    'mtype': 'groupchat', 'mto': 'testing@chat.example.com',
+                })
+        })
+
+        self.assertEqual(bot.client.schedules, [
+            "('mtj.jibber.testing.command.GreeterCommand', 'say_hello_all')",
+            "('mtj.jibber.testing.command.GreeterCommand', 'report_time')",
+        ])
+
+        self.assertEqual(len(bot.client.scheduler), 2)
+        self.assertEqual(len(bot.client.schedules), 2)
+
+        bot.send_package_method(
+            'mtj.jibber.testing.command.GreeterCommand', 'say_hello_all',
+             mto='test@chat.example.com')
+
+        self.assertEqual(len(bot.client.scheduler), 2)
+        self.assertEqual(len(bot.client.schedules), 3)
