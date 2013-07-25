@@ -56,14 +56,17 @@ class BotCore(object):
     def load_client_config(self, c_config):
         self.config.update(json.loads(c_config))
 
-    def setup_client(self, client):
+    def setup_client(self):
         """
         To be customized by client implementations.
         """
 
+    def register_client(self, client):
+        self.client = client
+        self.setup_client()
+
     def make_client(self):
         client = self._client_cls(self.jid, self.password)
-        self.setup_client(client)
         return client
 
     def connect(self):
@@ -71,9 +74,9 @@ class BotCore(object):
             logger.info('Bot appears to be connected.')
             return
         client = self.make_client()
-        client.connect(address=self.address)
-        client.process(block=False)
-        self.client = client
+        self.register_client(client)
+        self.client.connect(address=self.address)
+        self.client.process(block=False)
 
     def disconnect(self):
         if self.client is None:
@@ -98,10 +101,8 @@ class MucBotCore(BotCore):
     The base jabber bot class.
     """
 
-    def setup_client(self, client):
-        """
-        Client is a SleekXMPP client.
-        """
+    def make_client(self):
+        client = super(MucBotCore, self).make_client()
 
         self.setup_plugins(client, [
             'xep_0030',  # Service discovery
@@ -114,6 +115,7 @@ class MucBotCore(BotCore):
         ])
 
         self.muc = client.plugin['xep_0045']
+        return client
 
     def join_rooms(self, event):
         rooms = self.config.get('rooms', [])

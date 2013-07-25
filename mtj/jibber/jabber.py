@@ -20,12 +20,12 @@ class MucChatBot(MucBotCore):
     the appropriate responses.
     """
 
-    def setup_client(self, client):
+    def setup_client(self):
         """
         Client is a SleekXMPP client.
         """
 
-        super(MucChatBot, self).setup_client(client)
+        client = self.client
 
         self.setup_events(client, [
             ('groupchat_message', self.run_command),
