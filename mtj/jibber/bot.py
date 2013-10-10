@@ -1,4 +1,5 @@
 import re
+import random
 
 from mtj.jibber.core import Command
 
@@ -31,3 +32,30 @@ class Fortune(Command):
         if not fortune.startswith('<'):
             return '%s: %s' % (msg['mucnick'], fortune)
         return '<html><body>%s: %s</body></html>' % (msg['mucnick'], fortune)
+
+
+class ChanceGame(Command):
+
+    def __init__(self, chance_table):
+        """
+        List of 2-tuple in the format of chance and response.
+
+        Chance should be ordered in incremental real numbers < 1.
+        Response is the message associated with the chance to trigger.
+
+        >>> cg = ChanceGame((
+        ...     (0.1, 'You are dead.'),
+        ...     (1, 'You live!'),
+        ... ))
+        >>> cg.play({'mucnick': 'Tester'}, None)
+        'You...'
+        """
+
+        self.chance_table = chance_table
+
+    def play(self, msg, match):
+        chance = random.random()
+        for trigger, response in self.chance_table:
+            if chance < trigger:
+                return response % msg
+        return ''
