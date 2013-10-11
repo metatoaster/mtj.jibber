@@ -59,3 +59,12 @@ class ChanceGame(Command):
             if chance <= trigger:
                 return response % msg
         return ''
+
+
+class PickOne(Command):
+
+    def __init__(self, items):
+        self.items = items
+
+    def play(self, msg, match):
+        return random.choice(self.items)
