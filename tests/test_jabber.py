@@ -18,7 +18,7 @@ class TestClient(object):
 class MucBotTestCase(TestCase):
 
     def setUp(self):
-        self.test_package_command = 'mtj.jibber.testing.command.GreeterCommand'
+        self.test_package = 'mtj.jibber.testing.command.GreeterCommand'
         self.commands = [
             ['^%(nickname)s: hi', 'say_hi'],
             ['^%(nickname)s: hello', 'say_hello_all'],
@@ -72,6 +72,8 @@ class MucBotTestCase(TestCase):
         bot.config = self.config
 
         bot.setup_packages()
+
+        self.assertEqual(bot.objects[self.test_package].bot, bot)
 
         bot.run_command({
             'mucnick': 'tester',
@@ -224,7 +226,7 @@ class MucBotTestCase(TestCase):
             'body': 'print',
         }
         bot.run_listener(kw)
-        self.assertEqual(bot.objects[self.test_package_command].listened, [])
+        self.assertEqual(bot.objects[self.test_package].listened, [])
 
     def test_muc_bot_listeners(self):
         bot = MucChatBot()
@@ -239,14 +241,14 @@ class MucBotTestCase(TestCase):
             'body': 'print',
         }
         bot.run_listener(kw)
-        self.assertEqual(bot.objects[self.test_package_command].listened, [kw])
+        self.assertEqual(bot.objects[self.test_package].listened, [kw])
         kw2 = {
             'mucnick': 'testbot',
             'mucroom': 'testroom',
             'body': 'print',
         }
         bot.run_listener(kw2)
-        self.assertEqual(bot.objects[self.test_package_command].listened, [kw])
+        self.assertEqual(bot.objects[self.test_package].listened, [kw])
 
     def test_muc_bot_commentator(self):
         bot = MucChatBot()

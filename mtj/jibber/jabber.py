@@ -83,7 +83,9 @@ class MucChatBot(MucBotCore):
                 package)
             return
 
-        self.objects[package] = cls(**kwargs)
+        obj = cls(**kwargs)
+        obj.bot = self
+        self.objects[package] = obj
         self.setup_triggers(package, **configs)
         self.setup_listeners(package, **configs)
         self.setup_commentators(package, **configs)
