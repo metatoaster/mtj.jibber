@@ -27,6 +27,10 @@ class MucBotTestCase(TestCase):
             {'seconds': 7200, 'method': 'say_hello_all'},
             {'seconds': 1800, 'method': 'report_time'},
         ]
+        self.listeners = [
+            'listener',
+        ]
+        self.commentators = []
         self.kwargs = {}
         self.config = {
             'nickname': 'testbot',
@@ -36,6 +40,7 @@ class MucBotTestCase(TestCase):
                     'kwargs': self.kwargs,
                     'package': 'mtj.jibber.testing.command.GreeterCommand',
                     'commands': self.commands,
+                    'commentators': self.commentators,
                     'timers': [
                         {
                             'mtype': 'groupchat',
@@ -43,9 +48,7 @@ class MucBotTestCase(TestCase):
                             'schedule': self.schedule,
                         },
                     ],
-                    'listeners': [
-                        'listener',
-                    ]
+                    'listeners': self.listeners,
 
                 },
 
@@ -244,3 +247,65 @@ class MucBotTestCase(TestCase):
         }
         bot.run_listener(kw2)
         self.assertEqual(bot.objects[self.test_package_command].listened, [kw])
+
+    def test_muc_bot_commentator(self):
+        bot = MucChatBot()
+        bot.client = TestClient()
+        bot.nickname = 'testbot'
+        bot.config = self.config
+        self.commentators.append(['.*', 'repeat_you'])
+        bot.setup_packages()
+
+        bot.run_commentator({
+            'mucnick': 'tester',
+            'mucroom': 'testroom',
+            'body': 'hello you',
+        })
+
+        self.assertEqual(len(bot.client.msg), 1)
+        self.assertEqual(bot.client.msg[0]['mbody'], "hello you")
+        self.assertEqual(list(bot.commentary), ["hello you"])
+
+        # the above would have got the server to do this again.
+        bot.run_commentator({
+            'mucnick': 'testbot',
+            'mucroom': 'testroom',
+            'body': 'hello you',
+        })
+
+        # should be ignored.
+        self.assertEqual(len(bot.client.msg), 1)
+
+        # Someone else can of course say the same thing again and the
+        # bot will reply...
+        bot.run_commentator({
+            'mucnick': 'tester',
+            'mucroom': 'testroom',
+            'body': 'hello you',
+        })
+
+        self.assertEqual(len(bot.client.msg), 2)
+        self.assertEqual(list(bot.commentary), ["hello you", "hello you"])
+
+        # Say something different...
+        # bot will reply...
+        bot.run_commentator({
+            'mucnick': 'tester',
+            'mucroom': 'testroom',
+            'body': 'bye.',
+        })
+
+        self.assertEqual(len(bot.client.msg), 3)
+        self.assertEqual(list(bot.commentary), ["hello you", "bye."])
+
+        # Maybe a timer on that bomb in the bot ran out...
+        bot.run_commentator({
+            'mucnick': 'testbot',
+            'mucroom': 'testroom',
+            'body': 'BOOM',
+        })
+
+        self.assertEqual(len(bot.client.msg), 4)
+        # he commented.
+        self.assertEqual(list(bot.commentary), ["bye.", "BOOM"])
+        # would have repeated himself but we already tested that.

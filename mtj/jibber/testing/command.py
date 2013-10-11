@@ -29,3 +29,6 @@ class GreeterCommand(Command, Greeter):
 
     def listener(self, msg, match=None):
         return self.listened.append(msg)
+
+    def repeat_you(self, msg, match=None):
+        return msg['body']
