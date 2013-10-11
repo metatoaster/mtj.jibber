@@ -75,11 +75,11 @@ class MucChatBot(MucBotCore):
             return
 
         self.objects[package] = cls(**kwargs)
-        self.setup_command_triggers(package, **configs)
-        self.setup_command_listeners(package, **configs)
-        self.setup_command_timers(package, **configs)
+        self.setup_triggers(package, **configs)
+        self.setup_listeners(package, **configs)
+        self.setup_timers(package, **configs)
 
-    def setup_command_triggers(self, package, commands=None, **configs):
+    def setup_triggers(self, package, commands=None, **configs):
         if not commands:
             return
 
@@ -97,7 +97,7 @@ class MucChatBot(MucBotCore):
             except:
                 logger.exception('%s is an invalid command', command)
 
-    def setup_command_listeners(self, package, listeners=None, **configs):
+    def setup_listeners(self, package, listeners=None, **configs):
         self.listeners = []
 
         if not listeners:
@@ -107,7 +107,7 @@ class MucChatBot(MucBotCore):
             # this is to validate that this is a regex.
             self.listeners.append((package, listener))
 
-    def setup_command_timers(self, package, timers=None, **configs):
+    def setup_timers(self, package, timers=None, **configs):
         """
         Timers are in this format:
 
