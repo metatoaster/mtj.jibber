@@ -29,6 +29,7 @@ class MucChatBot(MucBotCore):
 
         self.setup_events(client, [
             ('groupchat_message', self.run_command),
+            ('groupchat_message', self.run_listener),
         ])
 
         # nickname can be undefined, but we need this to check regex.
@@ -68,6 +69,7 @@ class MucChatBot(MucBotCore):
 
         self.objects[package] = cls(**kwargs)
         self.setup_command_triggers(package, **configs)
+        self.setup_command_listeners(package, **configs)
         self.setup_command_timers(package, **configs)
 
     def setup_command_triggers(self, package, commands=None, **configs):
@@ -87,6 +89,16 @@ class MucChatBot(MucBotCore):
                 self.commands.append((trigger, package, method))
             except:
                 logger.exception('%s is an invalid command', command)
+
+    def setup_command_listeners(self, package, listeners=None, **configs):
+        self.listeners = []
+
+        if not listeners:
+            return
+
+        for listener in listeners:
+            # this is to validate that this is a regex.
+            self.listeners.append((package, listener))
 
     def setup_command_timers(self, package, timers=None, **configs):
         """
@@ -161,6 +173,18 @@ class MucChatBot(MucBotCore):
                     mto=msg['mucroom'], mtype='groupchat'):
                 # Okay we have a match.
                 matched += 1
+
+    def run_listener(self, msg):
+        if msg['mucnick'] == self.nickname:
+            # never listen to self.
+            return
+
+        for package, method in self.listeners:
+            f = getattr(self.objects[package], method)
+            try:
+                f(msg=msg)
+            except:
+                logger.exception('Error calling listener')
 
     def run_timer(self, method, args, kwargs):
         return method(*args, **kwargs)

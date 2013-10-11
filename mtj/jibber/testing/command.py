@@ -19,9 +19,13 @@ class GreeterCommand(Command, Greeter):
     def __init__(self, *a, **kw):
         self.a = str(a)
         self.kw = str(kw)
+        self.listened = []
 
     def say_a(self, msg, match):
         return self.a
 
     def say_kw(self, msg, match):
         return self.kw
+
+    def listener(self, msg, match=None):
+        return self.listened.append(msg)

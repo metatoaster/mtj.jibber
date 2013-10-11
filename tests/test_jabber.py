@@ -18,6 +18,7 @@ class TestClient(object):
 class MucBotTestCase(TestCase):
 
     def setUp(self):
+        self.test_package_command = 'mtj.jibber.testing.command.GreeterCommand'
         self.commands = [
             ['^%(nickname)s: hi', 'say_hi'],
             ['^%(nickname)s: hello', 'say_hello_all'],
@@ -47,6 +48,9 @@ class MucBotTestCase(TestCase):
                             'schedule': self.schedule,
                         },
                     ],
+                    'listeners': [
+                        'listener',
+                    ]
 
                 },
 
@@ -195,3 +199,46 @@ class MucBotTestCase(TestCase):
 
         self.assertEqual(len(bot.client.scheduler), 2)
         self.assertEqual(len(bot.client.schedules), 3)
+
+    def test_muc_bot_listeners_null(self):
+        bot = MucChatBot()
+        bot.client = TestClient()
+        bot.nickname = 'testbot'
+        bot.config = {
+            'nickname': 'testbot',
+            'commands_max_match': 1,
+            'commands_packages': [
+                {
+                    'kwargs': self.kwargs,
+                    'package': 'mtj.jibber.testing.command.GreeterCommand',
+                    'commands': self.commands,
+                    'listeners': [
+                    ]
+                },
+            ]
+        }
+        bot.setup_commands()
+        self.assertEqual(bot.listeners, [])
+
+        kw = {
+            'mucnick': 'tester',
+            'mucroom': 'testroom',
+            'body': 'print',
+        }
+        bot.run_listener(kw)
+        self.assertEqual(bot.objects[self.test_package_command].listened, [])
+
+    def test_muc_bot_listeners(self):
+        bot = MucChatBot()
+        bot.client = TestClient()
+        bot.nickname = 'testbot'
+        bot.config = self.config
+        bot.setup_commands()
+        self.assertNotEqual(bot.listeners, [])
+        kw = {
+            'mucnick': 'tester',
+            'mucroom': 'testroom',
+            'body': 'print',
+        }
+        bot.run_listener(kw)
+        self.assertEqual(bot.objects[self.test_package_command].listened, [kw])
