@@ -28,14 +28,17 @@ class MucChatBot(MucBotCore):
 
         client = self.client
 
-        self.setup_events(client, [
+        self.groupchat_message_handlers = [
             # bot might make fun of commands independently before doing
             # them...  actually, might depend on how the xmpp library
             # order this internally.
-            ('groupchat_message', self.run_commentator),
-            ('groupchat_message', self.run_command),
-            ('groupchat_message', self.run_listener),
-        ])
+            self.run_commentator,
+            self.run_command,
+            self.run_listener,
+        ]
+
+        self.setup_events(client, [('groupchat_message', f) for f in
+            self.groupchat_message_handlers])
 
         # nickname can be undefined, but we need this to check regex.
         self.nickname = self.config.get('nickname', 'bot')

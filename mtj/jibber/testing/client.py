@@ -11,31 +11,45 @@ class TestClient(object):
     Provide an emulation of client msg communication.
     """
 
-    def __init__(self, **kw):
+    def __init__(self, *a, **kw):
         self.plugins = []
         self.events = []
         self.defaults = {
             'mucnick': "Tester",
+            'mucroom': "testroom@chat.example.com",
         }
 
+        self.groupchat_message_handlers = []
         self.sent = []
 
         self.boundjid = Jid('Testbot',)
 
         self.defaults.update(kw)
 
-    def send_message(self, mbody, *a, **kw):
+    def send_message(self, mto, mbody, *a, **kw):
         logger.debug('args = %s', a)
         logger.debug('kwargs = %s', kw)
-        sent = '%s: %s' % (self.bot.nickname, mbody)
-        logger.info(sent)
-        self.sent.append(sent)
+        logger.info(mbody)
+        self.sent.append(mbody)
 
     def register_plugin(self, plugin):
         self.plugins.append(plugin)
 
     def add_event_handler(self, *a):
         self.events.append(a)
+        if a[0] == 'groupchat_message':
+            self.groupchat_message_handlers.append(a[1])
+
+    def disconnect(self):
+        pass
 
     def _clear(self):
         self.sent.clear()
+
+    def __call__(self, body, **kw):
+        msg = {}
+        msg['body'] = body
+        msg.update(self.defaults)
+        msg.update(kw)
+        for h in self.groupchat_message_handlers:
+            h(msg)
