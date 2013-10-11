@@ -2,6 +2,7 @@ from unittest import TestCase
 
 from mtj.jibber.core import BotCore
 from mtj.jibber.core import MucBotCore
+from mtj.jibber.testing.client import TestClient
 
 
 class BotTestCase(TestCase):
@@ -80,14 +81,6 @@ class BotTestCase(TestCase):
         self.assertTrue(bot.client is None)
 
     def test_setup_methods(self):
-        class TestClient(object):
-            def __init__(self, *a, **kw):
-                self.plugins = []
-                self.events = []
-            def register_plugin(self, plugin):
-                self.plugins.append(plugin)
-            def add_event_handler(self, *a):
-                self.events.append(a)
 
         def dummy():
             pass
@@ -114,12 +107,10 @@ class MucBotTestCase(TestCase):
             rooms = []
             def joinMUC(self, room, nickname, **kw):
                 self.rooms.append((nickname, room))
-        class TestClient(object):
-            boundjid = type('dummy', (object,), {'user': 'dummy'})
 
         bot = MucBotCore()
         bot.muc = TestMuc()
-        bot.client = TestClient
+        bot.client = TestClient()
 
         bot.config = {
             'nickname': 'tester',
