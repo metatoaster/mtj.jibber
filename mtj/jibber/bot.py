@@ -56,6 +56,6 @@ class ChanceGame(Command):
     def play(self, msg, match):
         chance = random.random()
         for trigger, response in self.chance_table:
-            if chance < trigger:
+            if chance <= trigger:
                 return response % msg
         return ''
