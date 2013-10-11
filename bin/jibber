@@ -45,16 +45,27 @@ if argv:
 else:
     c_config = None
 
+local_vars = {}
+
+spam = ('Starting interactive shell; `bot` is bound to the MucBot object.\n'
+    'Try calling bot.connect() to connect.')
+
+_debug = '-d' in argv
+
 bot.load_server_config(s_config)
 if c_config:
     bot.load_client_config(c_config)
+    local_vars[b'bot'] = bot
 
-console = code.InteractiveConsole(locals={
-    b'bot': bot,
-})
-result = console.interact(
-    'Starting interactive shell; `bot` is bound to the MucBot object.\n'
-    'Try calling bot.connect() to connect.')
+if _debug:
+    from mtj.jibber.testing.client import TestClient
+    spam = 'Starting interactive shell; use client(msg) to interact.'
+    bot.client = TestClient()
+    bot.setup_client()
+    local_vars[b'client'] = bot.client
+
+console = code.InteractiveConsole(locals=local_vars)
+result = console.interact(spam)
 
 # Try to disconnect on exit anyway.
 bot.disconnect()
