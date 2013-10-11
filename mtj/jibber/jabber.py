@@ -35,11 +35,13 @@ class MucChatBot(MucBotCore):
         # nickname can be undefined, but we need this to check regex.
         self.nickname = self.config.get('nickname', 'bot')
 
-        self.setup_commands()
+        self.setup_packages()
 
-    def setup_commands(self):
+    def setup_packages(self):
         """
         This is a fairly unsafe method.  Check your configs source.
+
+        Should really be a setup_packages thing.
         """
 
         self.objects = {}
@@ -47,17 +49,22 @@ class MucChatBot(MucBotCore):
         self.commands = []
         self.commands_max_match = self.config.get('commands_max_match', 1)
 
+        packages = self.config.get('packages')
         commands_packages = self.config.get('commands_packages')
 
         # verify sanity of this
-        if not commands_packages:
-            logger.warning('`commands_package` is not defined, aborting.')
-            return
+        if not packages:
+            if not commands_packages:
+                logger.warning('`packages` are not defined, aborting.')
+                return
+            packages = commands_packages
+            logger.warning('`commands_packages` is deprecated.  '
+                  'It is now renamed to `packages`.')
 
-        for package in commands_packages:
-            self.setup_command_package(**package)
+        for package in packages:
+            self.setup_package(**package)
 
-    def setup_command_package(self, package, kwargs, **configs):
+    def setup_package(self, package, kwargs, **configs):
         ns, clsname = package.rsplit('.', 1)
         cls = getattr(importlib.import_module(ns), clsname)
 

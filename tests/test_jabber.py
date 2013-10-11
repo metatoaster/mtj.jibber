@@ -31,7 +31,7 @@ class MucBotTestCase(TestCase):
         self.config = {
             'nickname': 'testbot',
             'commands_max_match': 1,
-            'commands_packages': [
+            'packages': [
                 {
                     'kwargs': self.kwargs,
                     'package': 'mtj.jibber.testing.command.GreeterCommand',
@@ -73,7 +73,7 @@ class MucBotTestCase(TestCase):
         bot.nickname = 'testbot'
         bot.config = self.config
 
-        bot.setup_commands()
+        bot.setup_packages()
 
         bot.run_command({
             'mucnick': 'tester',
@@ -88,11 +88,11 @@ class MucBotTestCase(TestCase):
         bot = MucChatBot()
         bot.client = TestClient()
         bot.nickname = 'testbot'
-        self.config['commands_packages'][0]['package'] = \
+        self.config['packages'][0]['package'] = \
             'mtj.jibber.testing.command.Greeter'
 
         bot.config = self.config
-        bot.setup_commands()
+        bot.setup_packages()
 
         bot.run_command({
             'mucnick': 'tester',
@@ -110,7 +110,7 @@ class MucBotTestCase(TestCase):
         self.add_kwargs({'arg1': 'test'})
         self.add_command(['printa', 'say_a'])
         self.add_command(['printkw', 'say_kw'])
-        bot.setup_commands()
+        bot.setup_packages()
 
         bot.run_command({
             'mucnick': 'tester',
@@ -135,7 +135,7 @@ class MucBotTestCase(TestCase):
         self.add_kwargs({'arg1': 'test'})
         self.add_command(['print', 'say_a'])
         self.add_command(['print', 'say_kw'])
-        bot.setup_commands()
+        bot.setup_packages()
 
         self.assertEqual(bot.commands_max_match, 1)
 
@@ -156,7 +156,7 @@ class MucBotTestCase(TestCase):
         self.add_command(['print', 'say_a'])
         self.add_command(['print', 'say_kw'])
         self.config['commands_max_match'] = 2
-        bot.setup_commands()
+        bot.setup_packages()
 
         bot.run_command({
             'mucnick': 'tester',
@@ -172,7 +172,7 @@ class MucBotTestCase(TestCase):
         bot.client = TestClient()
         bot.nickname = 'testbot'
         bot.config = self.config
-        bot.setup_commands()
+        bot.setup_packages()
 
         self.assertEqual(bot.timers, {
             ('mtj.jibber.testing.command.GreeterCommand', 'say_hello_all'):
@@ -207,7 +207,7 @@ class MucBotTestCase(TestCase):
         bot.config = {
             'nickname': 'testbot',
             'commands_max_match': 1,
-            'commands_packages': [
+            'packages': [
                 {
                     'kwargs': self.kwargs,
                     'package': 'mtj.jibber.testing.command.GreeterCommand',
@@ -217,7 +217,7 @@ class MucBotTestCase(TestCase):
                 },
             ]
         }
-        bot.setup_commands()
+        bot.setup_packages()
         self.assertEqual(bot.listeners, [])
 
         kw = {
@@ -233,7 +233,7 @@ class MucBotTestCase(TestCase):
         bot.client = TestClient()
         bot.nickname = 'testbot'
         bot.config = self.config
-        bot.setup_commands()
+        bot.setup_packages()
         self.assertNotEqual(bot.listeners, [])
         kw = {
             'mucnick': 'tester',
