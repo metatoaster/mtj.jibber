@@ -237,3 +237,10 @@ class MucBotTestCase(TestCase):
         }
         bot.run_listener(kw)
         self.assertEqual(bot.objects[self.test_package_command].listened, [kw])
+        kw2 = {
+            'mucnick': 'testbot',
+            'mucroom': 'testroom',
+            'body': 'print',
+        }
+        bot.run_listener(kw2)
+        self.assertEqual(bot.objects[self.test_package_command].listened, [kw])
