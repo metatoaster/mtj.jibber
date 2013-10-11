@@ -36,11 +36,6 @@ class MucBotTestCase(TestCase):
                     'kwargs': self.kwargs,
                     'package': 'mtj.jibber.testing.command.GreeterCommand',
                     'commands': self.commands,
-                },
-
-                {
-                    'kwargs': self.kwargs,
-                    'package': 'mtj.jibber.testing.command.GreeterCommand',
                     'timers': [
                         {
                             'mtype': 'groupchat',
