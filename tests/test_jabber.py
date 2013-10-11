@@ -24,7 +24,8 @@ class MucBotTestCase(TestCase):
             ['^%(nickname)s: hello', 'say_hello_all'],
         ]
         self.schedule = [
-            {'seconds': 7200, 'method': 'say_hello_all'},
+            {'seconds': 'abc', 'method': 'say_hello_all'},
+            {'seconds': (7200, 14400), 'method': 'say_hello_all'},
             {'seconds': 1800, 'method': 'report_time'},
         ]
         self.listeners = [
@@ -176,7 +177,7 @@ class MucBotTestCase(TestCase):
 
         self.assertEqual(bot.timers, {
             ('mtj.jibber.testing.command.GreeterCommand', 'say_hello_all'):
-                (7200, {
+                ((7200, 14400), {
                     'mtype': 'groupchat', 'mto': 'testing@chat.example.com',
                 }),
             ('mtj.jibber.testing.command.GreeterCommand', 'report_time'):

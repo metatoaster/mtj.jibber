@@ -2,6 +2,7 @@ import importlib
 import logging
 import re
 import json
+import random
 from collections import deque
 
 from sleekxmpp import ClientXMPP
@@ -161,6 +162,8 @@ class MucChatBot(MucBotCore):
                 }
             ]
 
+        Maybe we might want a way to allow for variance?
+
         """
 
         if not timers:
@@ -173,11 +176,23 @@ class MucChatBot(MucBotCore):
         for schedule in schedule:
             seconds = schedule['seconds']
             method = schedule['method']
-            if not isinstance(seconds, int):
-                logger.error('the value `%s` is not an int',
-                    seconds.__repr__())
+            if isinstance(seconds, int):
+                self.timers[(package, method)] = (seconds, msg_kwargs)
                 continue
-            self.timers[(package, method)] = (seconds, msg_kwargs)
+
+            try:
+                x, y = seconds
+                if isinstance(x, int) and isinstance(y, int):
+                    self.timers[(package, method)] = ((x, y), msg_kwargs)
+                    continue
+            except (ValueError, TypeError):
+                pass
+
+            logger.error(
+                'the value `%s` is invalid for timer `%s` in package `%s`; '
+                'valid value is either an int or a tuple of two integers '
+                'specifying the range of possible delays.  Ignored.',
+                seconds.__repr__(), method, package)
 
         for timer in self.timers.keys():
             self.register_timer(timer)
@@ -189,12 +204,12 @@ class MucChatBot(MucBotCore):
             pass
         seconds, kwargs = self.timers[args]
 
-        # If the sleekxmpp _event_runner method actually can cope with
-        # the extra kwargs argument supported by the schedule method...
-        # Oh well, workaround works like this.  It's wrappers all the
-        # way down.
+        if isinstance(seconds, tuple):
+            seconds = random.randint(*seconds)
+            logger.debug('%s will happen in %d', args, seconds)
+
         self.client.schedule(str(args), seconds, self.run_timer,
-            (self.send_package_method, args, kwargs), repeat=True)
+            (self.send_package_method, args, kwargs), repeat=False)
 
     def run_command(self, msg):
         if msg['mucnick'] == self.nickname:
@@ -265,7 +280,8 @@ class MucChatBot(MucBotCore):
 
 
     def run_timer(self, method, args, kwargs):
-        return method(*args, **kwargs)
+        result = method(*args, **kwargs)
+        return result
 
     def send_package_method(self, package, method, **kwargs):
         f = getattr(self.objects[package], method)
@@ -280,8 +296,9 @@ class MucChatBot(MucBotCore):
         if isinstance(raw_reply, basestring):
             self.send_message(raw=raw_reply, **kwargs)
 
-        # reset the timer if it's in timer
-        # XXX some other method should do this check?
+        # reset the timer if it's in timer; this is useful if there
+        # exist a command (or other triggers such as timer) triggered
+        # this, so that things can be rescheduled.
         if self.timers.get((package, method)):
             self.register_timer((package, method))
 
