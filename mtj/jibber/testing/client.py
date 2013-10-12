@@ -21,10 +21,14 @@ class TestClient(object):
 
         self.groupchat_message_handlers = []
         self.sent = []
+        self.scheduler = []
 
         self.boundjid = Jid('Testbot',)
 
         self.defaults.update(kw)
+
+    def schedule(self, *a, **kw):
+        pass
 
     def send_message(self, mto, mbody, *a, **kw):
         logger.debug('args = %s', a)
