@@ -15,7 +15,7 @@ import time
 from mtj.jibber.jabber import MucChatBot
 
 
-class Jibber(cmd.Cmd):
+class JibberCmd(cmd.Cmd):
 
     def __init__(self, bot):
         self.prompt = 'jibber> '
@@ -119,7 +119,7 @@ def main(args=None):
     bot.load_server_config(s_config)
     bot.load_client_config(c_config)
 
-    c = Jibber(bot)
+    c = JibberCmd(bot)
 
     # TODO make these logging configurable from the client_config
     logging.basicConfig(
