@@ -56,4 +56,7 @@ class TestClient(object):
         msg.update(self.defaults)
         msg.update(kw)
         for h in self.groupchat_message_handlers:
+            # XXX at some point once I figure out how to get handlers
+            # to also receive the client, output redirection back to
+            # here to allow both live and local tests at the same time.
             h(msg)
