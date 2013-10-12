@@ -33,8 +33,7 @@ setup(name='mtj.jibber',
       ],
       entry_points="""
       # -*- Entry points: -*-
+      [console_scripts]
+      jibber = mtj.jibber.ctrl:main
       """,
-      scripts=[
-          os.path.join("bin", "jibber"),
-      ],
       )
