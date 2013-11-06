@@ -32,3 +32,21 @@ class GreeterCommand(Command, Greeter):
 
     def repeat_you(self, msg, match=None):
         return msg['body']
+
+    def to_one_target(self, msg, match=None):
+        return {
+            'raw': 'hello target',
+            'mto': msg.get('mucroom', 'devnull@example.com')
+        }
+
+    def to_multi_target(self, msg, match=None):
+        return [
+            {
+                'raw': 'test123',
+                'mto': 'beacon@example.com',
+            },
+            {
+                'raw': '42',
+                'mto': 'answer@example.com',
+            },
+        ]

@@ -59,12 +59,50 @@ class MucBotTestCase(TestCase):
     def teatDown(self):
         pass
 
+    def mk_default_bot(self, config=None, nickname='testbot'):
+        bot = MucChatBot()
+        bot.client = TestClient()
+        bot.nickname = nickname
+        bot.config = config or self.config
+        bot.setup_packages()
+        return bot
+
     def add_command(self, cmd):
         self.commands.append(cmd)
 
     def add_kwargs(self, kwargs):
         self.kwargs.clear()
         self.kwargs.update(kwargs)
+
+    def test_send_package_method_text(self):
+        bot = self.mk_default_bot()
+        bot.send_package_method(
+            'mtj.jibber.testing.command.GreeterCommand', 'say_hello_all',
+             mto='test@chat.example.com')
+        self.assertEqual(bot.client.msg, [
+            {'mbody': 'hello all', 'mto': 'test@chat.example.com',
+            'mhtml': None},
+        ])
+
+    def test_send_package_method_dict(self):
+        bot = self.mk_default_bot()
+        bot.send_package_method(
+            'mtj.jibber.testing.command.GreeterCommand', 'to_one_target',
+             msg={'mucroom': 'test@chat.example.com'})
+        self.assertEqual(bot.client.msg, [
+            {'mto': 'test@chat.example.com', 'mbody': 'hello target',
+            'mhtml': None},
+        ])
+
+    def test_send_package_method_list_dict(self):
+        bot = self.mk_default_bot()
+        bot.send_package_method(
+            'mtj.jibber.testing.command.GreeterCommand', 'to_multi_target',
+             mto='test@chat.example.com')
+        self.assertEqual(bot.client.msg, [
+            {'mto': 'beacon@example.com', 'mbody': 'test123', 'mhtml': None},
+            {'mto': 'answer@example.com', 'mbody': '42', 'mhtml': None},
+        ])
 
     def test_muc_bot_success_general(self):
         bot = MucChatBot()
