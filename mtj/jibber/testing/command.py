@@ -50,3 +50,16 @@ class GreeterCommand(Command, Greeter):
                 'mto': 'answer@example.com',
             },
         ]
+
+    def to_trap(self, msg, match=None):
+        return [
+            {
+                'raw': 'pretrap',
+                'mto': 'trap@example.com',
+            },
+            None,  # the trap
+            {
+                'raw': 'posttrap',
+                'mto': 'trap@example.com',
+            },
+        ]

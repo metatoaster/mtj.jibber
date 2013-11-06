@@ -104,6 +104,16 @@ class MucBotTestCase(TestCase):
             {'mto': 'answer@example.com', 'mbody': '42', 'mhtml': None},
         ])
 
+    def test_send_package_method_list_trap(self):
+        bot = self.mk_default_bot()
+        bot.send_package_method(
+            'mtj.jibber.testing.command.GreeterCommand', 'to_trap',
+             mto='test@chat.example.com')
+        self.assertEqual(bot.client.msg, [
+            {'mto': 'trap@example.com', 'mbody': 'pretrap', 'mhtml': None},
+            {'mto': 'trap@example.com', 'mbody': 'posttrap', 'mhtml': None},
+        ])
+
     def test_muc_bot_success_general(self):
         bot = MucChatBot()
         bot.client = TestClient()
