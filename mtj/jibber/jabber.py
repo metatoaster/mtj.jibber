@@ -3,6 +3,7 @@ import logging
 import re
 import json
 import random
+import sys
 from collections import deque
 
 from sleekxmpp import ClientXMPP
@@ -14,6 +15,9 @@ from mtj.jibber.core import Command
 from mtj.jibber.utils import strip_tags
 
 logger = logging.getLogger('mtj.jibber.jabber')
+
+if sys.version_info > (3, 0):
+    unicode = str
 
 
 class MucChatBot(MucBotCore):
