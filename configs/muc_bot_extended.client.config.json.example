@@ -1,0 +1,33 @@
+{
+    "nickname": "bot",
+    "rooms": [
+        "testing@chat.example.com"
+    ],
+    "packages": [
+        {
+            "package": "mtj.jibber.testing.command.GreeterCommand",
+            "kwargs": {},
+            "commands": [
+                ["^%(nickname)s: hi", "say_hi"],
+                ["^Hello %(nickname)s", "say_hi"]
+            ]
+        },
+        {   
+            "package": "mtj.jibber.bot.PickOne",
+            "kwargs": {"items": [
+                "red!", "orange!", "yellow!", "green!", "blue!", "violet!"]},
+            "commands": [
+                ["^rainbow (color|colour)!$", "play"]
+            ]
+        },
+        {   
+            "package": "mtj.jibber.bot.ChanceGame",
+            "kwargs": {"chance_table": [
+                [0.125, "%(mucnick)s: BOOM"], [1, "%(mucnick)s: click"]
+            ]},
+            "commands": [
+                ["^%(nickname)s: rr$", "play"]
+            ]
+        }
+    ]
+}
