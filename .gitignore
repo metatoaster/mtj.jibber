@@ -5,3 +5,4 @@
 .*.swp
 .env
 *config.json
+.coverage
