@@ -1,5 +1,5 @@
 {
-    "nickname": "testbot",
+    "nickname": "bot",
     "rooms": [
         "testing@chat.example.com"
     ],
@@ -8,7 +8,8 @@
             "package": "mtj.jibber.testing.command.GreeterCommand",
             "kwargs": {},
             "commands": [
-                ["^%(nickname)s: hi", "say_hi"]
+                ["^%(nickname)s: hi", "say_hi"],
+                ["^Hello %(nickname)s", "say_hi"]
             ]
         }
     ]
