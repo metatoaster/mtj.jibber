@@ -234,9 +234,9 @@ class MucBotTestCase(TestCase):
                 })
         })
 
-        self.assertEqual(bot.client.schedules, [
-            "('mtj.jibber.testing.command.GreeterCommand', 'say_hello_all')",
+        self.assertEqual(sorted(bot.client.schedules), [
             "('mtj.jibber.testing.command.GreeterCommand', 'report_time')",
+            "('mtj.jibber.testing.command.GreeterCommand', 'say_hello_all')",
         ])
 
         self.assertEqual(len(bot.client.scheduler), 2)
