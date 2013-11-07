@@ -1,8 +1,9 @@
 Changelog
 =========
 
-0.0-dev (unreleased)
+0.1-dev (unreleased)
 --------------------
 
-- Package created using templer
-  [Tommy Yu]
+- Core functions implemented, including connect to XMPP server as a muc
+  client, and to provide trigger handlers and dynamic module/object
+  loaders so those triggers can make something happen.

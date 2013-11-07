@@ -3,8 +3,9 @@ Introduction
 
 mtj.jibber is a package that can be used to streamline the process of
 providing automagical useless bantering onto your friendly neighbourhood
-Jabber (XMPP) servers.  It's jibber jabber time.
+rooms (multiuser chat or MUCS) on all the Jabber (XMPP) servers.
 
+It's jibber jabber time.
 
 Installation
 ============
