@@ -7,6 +7,11 @@ rooms (multiuser chat or MUCS) on all the Jabber (XMPP) servers.
 
 It's jibber jabber time.
 
+.. image:: https://travis-ci.org/metatoaster/mtj.jibber.png?branch=master
+   :target: https://travis-ci.org/metatoaster/mtj.jibber
+.. image:: https://coveralls.io/repos/metatoaster/mtj.jibber/badge.png?branch=master
+   :target: https://coveralls.io/r/metatoaster/mtj.jibber?branch=master
+
 Installation
 ============
 
