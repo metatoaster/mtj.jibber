@@ -29,6 +29,7 @@ class BotCore(object):
 
         self.client = None
         self.config = {}
+        self.s_config = {}
 
         if s_config is not None:
             self.load_server_config(s_config)
@@ -42,10 +43,11 @@ class BotCore(object):
         """
 
         c = json.loads(s_config)
-        self.jid = c.get('jid')
-        self.password = c.get('password')
-        self.host = c.get('host', self.host)
-        self.port = int(c.get('port', self.port))
+        self.jid = c.pop('jid')
+        self.password = c.pop('password')
+        self.host = c.pop('host', self.host)
+        self.port = int(c.pop('port', self.port))
+        self.s_config = c
 
     @property
     def address(self):
@@ -75,7 +77,7 @@ class BotCore(object):
             return
         client = self.make_client()
         self.register_client(client)
-        self.client.connect(address=self.address)
+        self.client.connect(address=self.address, **self.s_config)
         self.client.process(block=False)
 
     def disconnect(self):
