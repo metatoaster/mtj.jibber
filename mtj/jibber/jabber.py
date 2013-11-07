@@ -303,7 +303,7 @@ class MucChatBot(MucBotCore):
             logger.exception('Failed to send_package_method')
             return
 
-        if isinstance(raw_reply, basestring):
+        if type(raw_reply) in (str, unicode):
             self.send_message(raw=raw_reply, **kwargs)
         elif isinstance(raw_reply, dict):
             send_raw(raw_reply)
