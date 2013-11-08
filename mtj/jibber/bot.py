@@ -43,6 +43,12 @@ class Fortune(Command):
     >>> fortune = Fortune(fortune_items=['Stick with what you got.'])
     >>> fortune.fortune({'mucnick': 'Tester'}, None)
     'Tester: Stick with what you got.'
+
+    HTML will be rendered.
+
+    >>> fortune = Fortune(fortune_items=['<strong>So very strong</strong>.'])
+    >>> fortune.fortune({'mucnick': 'Tester'}, None)
+    '<html><body>Tester: <strong>So very strong</strong>.</body></html>'
     """
 
     def __init__(self, fortune_file=None, fortune_items=None):
@@ -82,11 +88,15 @@ class ChanceGame(Command):
 
     >>> def dummy(msg, match):
     ...     return 'No way, %(mucnick)s.'
-    >>> cg = ChanceGame((
-    ...     (1, dummy),
-    ... ))
+    >>> cg = ChanceGame(((1, dummy),))
     >>> cg.play({'mucnick': 'Tester'}, None)
     'No way, Tester.'
+
+    Alternatively, insufficient chances will result in no output.
+
+    >>> cg = ChanceGame(((-0.1, 'This has no chance'),))
+    >>> cg.play({'mucnick': 'Tester'}, None)
+    ''
     """
 
     def __init__(self, chance_table):
