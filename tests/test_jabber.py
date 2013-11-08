@@ -56,7 +56,7 @@ class MucBotTestCase(TestCase):
             ]
         }
 
-    def teatDown(self):
+    def tearDown(self):
         pass
 
     def mk_default_bot(self, config=None, nickname='testbot'):

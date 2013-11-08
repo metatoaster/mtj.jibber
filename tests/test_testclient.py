@@ -26,7 +26,7 @@ class TestClientTestCase(TestCase):
             ]
         }
 
-    def teatDown(self):
+    def tearDown(self):
         pass
 
     def test_muc_bot_success_general(self):

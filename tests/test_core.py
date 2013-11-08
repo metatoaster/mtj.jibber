@@ -10,7 +10,7 @@ class BotTestCase(TestCase):
     def setUp(self):
         pass
 
-    def teatDown(self):
+    def tearDown(self):
         pass
 
     def test_bot_core_base(self):
@@ -99,7 +99,7 @@ class MucBotTestCase(TestCase):
     def setUp(self):
         pass
 
-    def teatDown(self):
+    def tearDown(self):
         pass
 
     def test_join_rooms(self):
