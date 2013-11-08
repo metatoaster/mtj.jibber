@@ -67,16 +67,6 @@ class MucChatBot(MucBotCore):
         assert self.commentary_qsize > 0
 
         packages = self.config.get('packages')
-        commands_packages = self.config.get('commands_packages')
-
-        # verify sanity of this
-        if not packages:
-            if not commands_packages:
-                logger.warning('`packages` are not defined, aborting.')
-                return
-            packages = commands_packages
-            logger.warning('`commands_packages` is deprecated.  '
-                  'It is now renamed to `packages`.')
 
         for package in packages:
             self.setup_package(**package)
