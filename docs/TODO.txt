@@ -1,0 +1,12 @@
+A better way to structure commands across multiple packages
+
+- So that the preferences for commands to fire are not restricted on the
+  ordering of their packages.
+
+Cascading response with a stop on trigger
+
+- Say bot responds to weather queries.  Define trigger to be the same
+  for multiple calls, but one call may be some kind of trap for a funny
+  response and also results in subsequent queries (like detailed
+  weather information) to not be reported.
+- Could be marked as an exclusive response, if triggered.
