@@ -2,6 +2,7 @@ from unittest import TestCase
 
 from mtj.jibber.core import BotCore
 from mtj.jibber.core import MucBotCore
+from mtj.jibber.core import Command
 from mtj.jibber.testing.client import TestClient
 
 
@@ -16,6 +17,25 @@ class BotTestCase(TestCase):
     def test_bot_core_base(self):
         bot = BotCore()
         self.assertTrue(bot.jid is None)
+
+    def test_bot_core_s_config(self):
+        bot = BotCore(s_config='''{
+            "jid": "test@example.com",
+            "password": "password"
+        }''')
+
+        self.assertEqual(bot.jid, 'test@example.com')
+        self.assertEqual(bot.password, 'password')
+        self.assertEqual(bot.host, None)
+        self.assertEqual(bot.port, 5222)
+
+    def test_bot_core_c_config(self):
+        config = '{"a_setting": "value"}'
+        bot = BotCore(c_config=config)
+        self.assertEqual(bot.config, {'a_setting': 'value'})
+        config = '{"a_setting": "value2", "b": "number"}'
+        bot.load_client_config(config)
+        self.assertEqual(bot.config, {'a_setting': 'value2', 'b': 'number'})
 
     def test_bot_core_server_config(self):
         bot = BotCore()
@@ -102,6 +122,12 @@ class MucBotTestCase(TestCase):
     def tearDown(self):
         pass
 
+    def test_muc_core_base(self):
+        bot = MucBotCore()
+        bot.make_client()
+        self.assertTrue(bot.jid is None)
+        self.assertFalse(bot.muc is None)
+
     def test_join_rooms(self):
         class TestMuc(object):
             rooms = []
@@ -122,3 +148,9 @@ class MucBotTestCase(TestCase):
             ('tester', 'testroom@chat.example.com'),
             ('tester', 'tester@chat.example.com'),
         ])
+
+
+class CommandTestCase(TestCase):
+
+    def test_command(self):
+        c = Command()
