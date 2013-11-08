@@ -65,37 +65,32 @@ Client Config
 The packages object contain the list of "packages" that will be
 instantiated for the bot to use.  The keys follow:
 
-    package
-        The full path to the class (or any callables that return an
-        instance of one).
-
-    kwargs
-        The keyword arguments that will be passed into that call.
-
-    commands
-        A 2-tuple (well, list, this is JSON after all) of regex string,
-        method.  The method is a callable attribute will be provided by
-        the object returned by the calling ``package(**kwargs)``.  The
-        regex can contain some string format keywords, most notably
-        ``nickname`` which is the nickname assigned to the bot.
-        Commands only get executed to the maximum commands limit, and
-        the bot will not try to match something it says with the ones
-        here.
-
-    commentators
-        Exactly like commands, except the bot will try to comment on
-        things it says up to a limit.  Default is sane, I am not going
-        to teach you how to override that because hilarious infinite
-        loops can happen
-
-    listeners
-        All messages passed to the bot will be listened, but no output
-        will be sent.
-
-    timers
-        A list of objects that will be used to instantiate repeated
-        commands at a delay.  This is somewhat advanced and not
-        covered here.  The test cases might explain how this works.
+package
+    The full path to the class (or any callables that return an
+    instance of one).
+kwargs
+    The keyword arguments that will be passed into that call.
+commands
+    A 2-tuple (well, list, this is JSON after all) of regex string,
+    method.  The method is a callable attribute will be provided by
+    the object returned by the calling ``package(**kwargs)``.  The
+    regex can contain some string format keywords, most notably
+    ``nickname`` which is the nickname assigned to the bot.
+    Commands only get executed to the maximum commands limit, and
+    the bot will not try to match something it says with the ones
+    here.
+commentators
+    Exactly like commands, except the bot will try to comment on
+    things it says up to a limit.  Default is sane, I am not going
+    to teach you how to override that because hilarious infinite
+    loops can happen
+listeners
+    All messages passed to the bot will be listened, but no output
+    will be sent.
+timers
+    A list of objects that will be used to instantiate repeated
+    commands at a delay.  This is somewhat advanced and not
+    covered here.  The test cases might explain how this works.
 
 The commands_max_match can be defined to match up to that amount of
 commands, i.e. the commands will not further cascade down once that
@@ -173,16 +168,16 @@ The server configuration should be simple.  It is done this way to split
 out the connection settings from the actual bot settings you may wish to
 pass onto your friends.  The keys as follows:
 
-    jid
-        The jid that is used to connect to the server.
-    password
-        Password associated with the jid
-    host
-        The host used to connect to the server.  Optional as this can
-        be derived from jid, but quite often the actual host is often
-        different so this usually needs to be specified.
-    port
-        Defaults to 5222.
+jid
+    The jid that is used to connect to the server.
+password
+    Password associated with the jid
+host
+    The host used to connect to the server.  Optional as this can
+    be derived from jid, but quite often the actual host is often
+    different so this usually needs to be specified.
+port
+    Defaults to 5222.
 
 Remaining keys are passed into the connect method for a sleekxmpp client
 instance.  Refer to documentations over there if you are curious on what
