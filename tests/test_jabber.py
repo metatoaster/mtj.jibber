@@ -74,6 +74,22 @@ class MucBotTestCase(TestCase):
         self.kwargs.clear()
         self.kwargs.update(kwargs)
 
+    def test_send_message_text(self):
+        bot = self.mk_default_bot()
+        bot.send_message(raw='test', mto='')
+        self.assertEqual(bot.client.msg[-1],
+            {'mbody': 'test', 'mhtml': None, 'mto': '',})
+
+    def test_send_message_html(self):
+        bot = self.mk_default_bot()
+        bot.send_message(raw='<p>test</p>', mto='')
+        self.assertEqual(bot.client.msg[-1],
+            {'mbody': 'test', 'mhtml': '<p>test</p>', 'mto': '',})
+
+        bot.send_message(raw='<html>test</html>', mto='')
+        self.assertEqual(bot.client.msg[-1],
+            {'mbody': 'test', 'mhtml': '<html>test</html>', 'mto': '',})
+
     def test_send_package_method_text(self):
         bot = self.mk_default_bot()
         bot.send_package_method(
@@ -114,24 +130,65 @@ class MucBotTestCase(TestCase):
             {'mto': 'trap@example.com', 'mbody': 'posttrap', 'mhtml': None},
         ])
 
-    def test_muc_bot_success_general(self):
+    def test_send_package_method_error(self):
+        class E(object):
+            def fail(self):
+                raise NotImplementedError
+        bot = self.mk_default_bot()
+        bot.objects['error'] = E()
+        bot.send_package_method('error', 'fail')
+        # error should be logged
+        self.assertEqual(bot.client.msg, [])
+
+        # for whatever reason, if somehow things got mangled inside...
+        # eventually if we allow low level reloading we might have to
+        # trap this also.
+        self.assertRaises(AttributeError, bot.send_package_method,
+            'error', 'failure')
+
+    def test_setup_triggers(self):
         bot = MucChatBot()
-        bot.client = TestClient()
-        bot.nickname = 'testbot'
-        bot.config = self.config
+        bot.nickname = 'test'
+        bot.commands = []
+        marker = object()
 
-        bot.setup_packages()
+        # null command
+        bot.setup_commands(marker, commands=None)
+        self.assertEqual(bot.commands, [])
 
+        # bad commands
+        bot.setup_commands(object(), commands=[
+            [], # not enough values
+            ['(', 'command'],  # bad regex
+        ])
+        self.assertEqual(bot.commands, [])
+
+        # bad commands
+        bot.setup_commands(object(), commands=[
+            ['(test)', 'command'],
+        ])
+        self.assertEqual(len(bot.commands), 1)
+
+    def test_muc_bot_success_command(self):
+        bot = self.mk_default_bot()
         self.assertEqual(bot.objects[self.test_package].bot, bot)
-
         bot.run_command({
             'mucnick': 'tester',
             'mucroom': 'testroom',
             'body': 'testbot: hi',
         })
-
         self.assertEqual(bot.client.msg[0]['mtype'], 'groupchat')
         self.assertEqual(bot.client.msg[0]['mbody'], 'hi tester')
+
+    def test_muc_bot_success_command_ignore_self(self):
+        bot = self.mk_default_bot()
+        self.assertEqual(bot.objects[self.test_package].bot, bot)
+        bot.run_command({
+            'mucnick': 'testbot',
+            'mucroom': 'testroom',
+            'body': 'testbot: hi',
+        })
+        self.assertEqual(bot.client.msg, [])
 
     def test_muc_bot_fail_not_command(self):
         bot = MucChatBot()
@@ -278,11 +335,7 @@ class MucBotTestCase(TestCase):
         self.assertEqual(bot.objects[self.test_package].listened, [])
 
     def test_muc_bot_listeners(self):
-        bot = MucChatBot()
-        bot.client = TestClient()
-        bot.nickname = 'testbot'
-        bot.config = self.config
-        bot.setup_packages()
+        bot = self.mk_default_bot()
         self.assertNotEqual(bot.listeners, [])
         kw = {
             'mucnick': 'tester',
@@ -299,13 +352,21 @@ class MucBotTestCase(TestCase):
         bot.run_listener(kw2)
         self.assertEqual(bot.objects[self.test_package].listened, [kw])
 
+    def test_muc_bot_listener_error(self):
+        class E(object):
+            def fail(self):
+                raise NotImplementedError
+        bot = self.mk_default_bot()
+        bot.objects['error'] = E()
+        bot.listeners.append(('error', 'fail'))
+        kw = {'mucnick': 'tester', 'mucroom': 'testroom', 'body': 'print'}
+        bot.run_listener(kw)
+        # error should be logged
+        self.assertEqual(bot.objects[self.test_package].listened, [kw])
+
     def test_muc_bot_commentator(self):
-        bot = MucChatBot()
-        bot.client = TestClient()
-        bot.nickname = 'testbot'
-        bot.config = self.config
         self.commentators.append(['.*', 'repeat_you'])
-        bot.setup_packages()
+        bot = self.mk_default_bot()
 
         bot.run_commentator({
             'mucnick': 'tester',
@@ -360,3 +421,28 @@ class MucBotTestCase(TestCase):
         # he commented.
         self.assertEqual(list(bot.commentary), ["bye.", "BOOM"])
         # would have repeated himself but we already tested that.
+
+    def test_muc_bot_commentator_explicit(self):
+        self.commentators.append(['repeat: ', 'repeat_you'])
+        bot = self.mk_default_bot()
+
+        bot.run_commentator({
+            'mucnick': 'tester',
+            'mucroom': 'testroom',
+            'body': 'hello you',
+        })
+        self.assertEqual(len(bot.client.msg), 0)
+
+        bot.run_commentator({
+            'mucnick': 'tester',
+            'mucroom': 'testroom',
+            'body': 'repeat: hello you',
+        })
+        self.assertEqual(len(bot.client.msg), 1)
+
+    def test_run_timer(self):
+        bot = self.mk_default_bot()
+        def testfunc(s, c):
+            return s * c
+        result = bot.run_timer(testfunc, ('s',), {'c': 2})
+        self.assertEqual(result, 'ss')
