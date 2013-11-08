@@ -144,6 +144,3 @@ def main(args=None, _bot_cls=MucChatBot, _cmd_cls=JibberCmd):
         return c.onecmd(parsed_args.command + ' ' + cmdarg)
     else:  # interactive mode
         c.cmdloop()
-
-if __name__ == "__main__":
-    main()
