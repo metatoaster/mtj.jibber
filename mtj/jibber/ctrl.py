@@ -22,6 +22,8 @@ class JibberCmd(cmd.Cmd):
         self.pidfile = 'jibber.pid'
         cmd.Cmd.__init__(self)
         self.bot = bot
+        self.loop = True
+        self.timeout = 1
 
     def do_fg(self, arg):
         """
@@ -29,12 +31,14 @@ class JibberCmd(cmd.Cmd):
         """
 
         self.bot.connect()
-        while 1:
+        while self.loop:
             try:
-                time.sleep(1)
+                time.sleep(self.timeout)
+                # TODO implement some sort of isalive, so we can
+                # self.loop = bot.isalive()
             except:
-                self.bot.disconnect()
-                return
+                self.loop = False
+        self.bot.disconnect()
 
     def do_debug(self, arg):
         """
@@ -87,7 +91,7 @@ def read_config(config):
     except IOError:
         print('cannot load config file `%s`' % config)
 
-def main(args=None):
+def main(args=None, _bot_cls=MucChatBot, _cmd_cls=JibberCmd):
     if args is None:
         args = sys.argv[1:]
 
@@ -115,11 +119,11 @@ def main(args=None):
         from sleekxmpp.util.misc_ops import setdefaultencoding
         setdefaultencoding('utf8')
 
-    bot = MucChatBot()
+    bot = _bot_cls()
     bot.load_server_config(s_config)
     bot.load_client_config(c_config)
 
-    c = JibberCmd(bot)
+    c = _cmd_cls(bot)
 
     # TODO make these logging configurable from the client_config
     logging.basicConfig(
