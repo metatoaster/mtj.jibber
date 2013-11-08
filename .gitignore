@@ -3,6 +3,6 @@
 /*.egg-info
 *.py[co]
 .*.swp
-.env
+.env*
 *config.json
 .coverage

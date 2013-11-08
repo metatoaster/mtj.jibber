@@ -55,8 +55,8 @@ class JibberCmd(cmd.Cmd):
             print("Test client ready; call client('Hello bot') to interact.")
 
         console = code.InteractiveConsole(locals={
-            b'bot': self.bot,
-            b'bot_test': bot_test,
+            'bot': self.bot,
+            'bot_test': bot_test,
         })
 
         result = console.interact(

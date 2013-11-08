@@ -81,7 +81,7 @@ class CtrlTestCase(TestCase):
 
     def test_read_config(self):
         tf = tempfile.NamedTemporaryFile()
-        tf.write('test')
+        tf.write(b'test')
         tf.flush()
         self.assertEqual(ctrl.read_config(tf.name), 'test')
 
@@ -94,7 +94,7 @@ class CtrlTestCase(TestCase):
     def test_main_console(self):
         tf = tempfile.NamedTemporaryFile()
         args = [tf.name, tf.name]
-        tf.write('test')
+        tf.write(b'test')
         tf.flush()
         ctrl.main(args, _bot_cls=FakeBot, _cmd_cls=FakeCmd)
         # workaround appended
@@ -102,7 +102,7 @@ class CtrlTestCase(TestCase):
 
     def test_main_fg(self):
         tf = tempfile.NamedTemporaryFile()
-        tf.write('test')
+        tf.write(b'test')
         tf.flush()
         args = [tf.name, tf.name, 'fg']
         result = ctrl.main(args, _bot_cls=FakeBot, _cmd_cls=FakeCmd)
