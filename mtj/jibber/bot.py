@@ -10,9 +10,16 @@ class FakeActions(Command):
 
     def do_things(self, msg, match):
         """
-        Expects a regex with groups matched.  Example:
+        Expects a regex with groups matched.  Example regex might be
+        like this inside the configuration file.
 
             ^%(nickname)s: go (.*)
+
+        >>> act = FakeActions()
+        >>> regexp = re.compile('go (.*)')
+        >>> match = regexp.search('go write better code')
+        >>> act.do_things({'mucnick': 'Tester'}, match)
+        'Tester: Okay, I will write better code.'
         """
 
         action = self.punctuation.sub('', match.groups()[0])
@@ -20,12 +27,33 @@ class FakeActions(Command):
 
 
 class Fortune(Command):
+    """
+    Give a random fortune.
 
-    def __init__(self, fortune_file):
-        import fortune
+    fortune_file
+        The fortune file.  Requires the ``fortune`` package to be
+        installed.
+    fortune_items
+        Alternatively, specify a list of strings to be used as fortunes.
 
-        fortune.make_fortune_data_file(fortune_file, quiet=True)
-        self._fortune = lambda: fortune.get_random_fortune(fortune_file)
+    >>> fortune = Fortune()
+    Traceback (most recent call last):
+    ...
+    TypeError: ...
+    >>> fortune = Fortune(fortune_items=['Stick with what you got.'])
+    >>> fortune.fortune({'mucnick': 'Tester'}, None)
+    'Tester: Stick with what you got.'
+    """
+
+    def __init__(self, fortune_file=None, fortune_items=None):
+        if fortune_file:
+            import fortune
+            fortune.make_fortune_data_file(fortune_file, quiet=True)
+            self._fortune = lambda: fortune.get_random_fortune(fortune_file)
+        elif fortune_items:
+            self._fortune = lambda: random.choice(fortune_items)
+        else:
+            raise TypeError('specify either fortune_file or fortune_items')
 
     def fortune(self, msg, match):
         fortune = self._fortune().strip()
