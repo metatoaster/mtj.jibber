@@ -84,12 +84,12 @@ class MucChatBot(MucBotCore):
         obj = cls(**kwargs)
         obj.bot = self
         self.objects[package] = obj
-        self.setup_triggers(package, **configs)
+        self.setup_commands(package, **configs)
         self.setup_listeners(package, **configs)
         self.setup_commentators(package, **configs)
         self.setup_timers(package, **configs)
 
-    def setup_triggers(self, package, commands=None, **configs):
+    def setup_commands(self, package, commands=None, **configs):
         if not commands:
             return
 
