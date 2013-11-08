@@ -34,9 +34,11 @@ class JibberCmd(cmd.Cmd):
         while self.loop:
             try:
                 time.sleep(self.timeout)
-                # TODO implement some sort of isalive, so we can
-                # self.loop = bot.isalive()
+                self.loop = self.bot.is_alive()
+            except KeyboardInterrupt:
+                self.loop = False
             except:
+                print('bot is dying in a fire, attempting to abort...')
                 self.loop = False
         self.bot.disconnect()
 
@@ -61,6 +63,7 @@ class JibberCmd(cmd.Cmd):
             'Starting interactive shell. '
             '`bot` is bound to the MucBot object.\n'
             'Try calling bot.connect() to connect to the server specified.\n'
+            'Note: process will NOT terminate if bot.is_alive() is False!\n'
             'Alternatively call bot_test() to test here locally.')
         self.bot.disconnect()
 

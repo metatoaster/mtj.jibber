@@ -37,12 +37,16 @@ def capture_stdio(inputs=''):
 
 class FakeBot(object):
     connected = disconnected = 0
+    alive = 1
     def setup_client(self):
         pass
     def connect(self):
         self.connected += 1
     def disconnect(self):
         self.disconnected += 1
+    def is_alive(self):
+        self.alive -= 1
+        return self.alive
     def load_server_config(self, cfg):
         pass
     def load_client_config(self, cfg):
@@ -55,6 +59,10 @@ class FakeCmd(object):
         return cmd
     def cmdloop(self):
         pass
+
+class NotBot(FakeBot):
+    def is_alive(self):
+        raise ValueError
 
 
 class CtrlTestCase(TestCase):
@@ -83,7 +91,7 @@ class CtrlTestCase(TestCase):
         # workaround appended
         self.assertEqual(args[-1], 'console')
 
-    def test_main(self):
+    def test_main_console(self):
         tf = tempfile.NamedTemporaryFile()
         args = [tf.name, tf.name]
         tf.write('test')
@@ -92,7 +100,7 @@ class CtrlTestCase(TestCase):
         # workaround appended
         self.assertEqual(args[-1], 'console')
 
-    def test_main_cmd(self):
+    def test_main_fg(self):
         tf = tempfile.NamedTemporaryFile()
         tf.write('test')
         tf.flush()
@@ -114,13 +122,28 @@ class CtrlTestCase(TestCase):
             cmd.do_debug(())
             self.assertEqual(out.items[1],
                 "Test client ready; call client('Hello bot') to interact.")
+            cmd.do_EOF(())
 
     def test_cmd_bot_fg(self):
         bot = FakeBot()
         cmd = ctrl.JibberCmd(bot)
-        cmd.loop = cmd.timeout = 0
+        cmd.timeout = 0
         with capture_stdio() as stdio:
             in_, out, err = stdio
             cmd.do_fg(())
             self.assertEqual(bot.connected, 1)
             self.assertEqual(bot.disconnected, 1)
+            self.assertFalse('bot is dying in a fire, attempting to abort...'
+                in out.items)
+
+    def test_cmd_bot_fg_nope(self):
+        bot = NotBot()
+        cmd = ctrl.JibberCmd(bot)
+        cmd.timeout = 0
+        with capture_stdio() as stdio:
+            in_, out, err = stdio
+            cmd.do_fg(())
+            self.assertEqual(bot.connected, 1)
+            self.assertEqual(bot.disconnected, 1)
+            self.assertTrue('bot is dying in a fire, attempting to abort...'
+                in out.items)

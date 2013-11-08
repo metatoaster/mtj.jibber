@@ -17,6 +17,7 @@ class BotTestCase(TestCase):
     def test_bot_core_base(self):
         bot = BotCore()
         self.assertTrue(bot.jid is None)
+        self.assertTrue(bot.is_alive())
 
     def test_bot_core_s_config(self):
         bot = BotCore(s_config='''{

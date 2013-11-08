@@ -55,6 +55,9 @@ class BotCore(object):
             return None
         return (self.host, self.port)
 
+    def is_alive(self):
+        return True
+
     def load_client_config(self, c_config):
         self.config.update(json.loads(c_config))
 
