@@ -8,7 +8,7 @@ class FakeActions(Command):
 
     punctuation = re.compile('[\.\?\!\,]*$')
 
-    def do_things(self, msg, match):
+    def do_things(self, msg, match, **kw):
         """
         Expects a regex with groups matched.  Example regex might be
         like this inside the configuration file.
@@ -86,7 +86,7 @@ class ChanceGame(Command):
 
     The parameter can alternatively be a callable, too.
 
-    >>> def dummy(msg, match):
+    >>> def dummy(msg, match, **kw):
     ...     return 'No way, %(mucnick)s.'
     >>> cg = ChanceGame(((1, dummy),))
     >>> cg.play({'mucnick': 'Tester'}, None)
@@ -102,12 +102,12 @@ class ChanceGame(Command):
     def __init__(self, chance_table):
         self.chance_table = chance_table
 
-    def play(self, msg, match):
+    def play(self, msg, match, **kw):
         chance = random.random()
         for trigger, response in self.chance_table:
             if chance <= trigger:
                 if callable(response):
-                    response = response(msg, match)
+                    response = response(msg, match, **kw)
                 return response % msg
         return ''
 
@@ -126,7 +126,7 @@ class PickOne(Command):
 
     The parameter can alternatively be a callable, too.
 
-    >>> def dummy(msg, match):
+    >>> def dummy(msg, match, **kw):
     ...     return 'No way, %(mucnick)s.'
     >>> po = PickOne((dummy,))
     >>> po.play({'mucnick': 'Tester'}, None)
@@ -136,8 +136,8 @@ class PickOne(Command):
     def __init__(self, items):
         self.items = items
 
-    def play(self, msg, match):
+    def play(self, msg, match, **kw):
         result = random.choice(self.items)
         if callable(result):
-            return result(msg, match) % msg
+            return result(msg, match, **kw) % msg
         return result % msg

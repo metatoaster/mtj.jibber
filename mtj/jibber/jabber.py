@@ -292,7 +292,12 @@ class MucChatBot(MucBotCore):
         try:
             msg = kwargs.pop('msg', {})
             match = kwargs.pop('match', None)
-            raw_reply = f(msg=msg, match=match)
+            try:
+                raw_reply = f(msg=msg, match=match, bot=self)
+            except TypeError:
+                # legacy package method definition does not accept bot.
+                logger.info('%s.%s does not accept the `bot` argument')
+                raw_reply = f(msg=msg, match=match)
         except:
             logger.exception('Failed to send_package_method')
             return

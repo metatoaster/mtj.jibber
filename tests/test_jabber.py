@@ -21,6 +21,7 @@ class MucBotTestCase(TestCase):
         self.test_package = 'mtj.jibber.testing.command.GreeterCommand'
         self.commands = [
             ['^%(nickname)s: hi', 'say_hi'],
+            ['^%(nickname)s: legacy', 'say_legacy_hi'],
             ['^%(nickname)s: hello', 'say_hello_all'],
         ]
         self.schedule = [
@@ -176,6 +177,17 @@ class MucBotTestCase(TestCase):
             'mucnick': 'tester',
             'mucroom': 'testroom',
             'body': 'testbot: hi',
+        })
+        self.assertEqual(bot.client.msg[0]['mtype'], 'groupchat')
+        self.assertEqual(bot.client.msg[0]['mbody'], 'hi tester')
+
+    def test_muc_bot_legacy_command(self):
+        # TODO until the bot argument is required...
+        bot = self.mk_default_bot()
+        bot.run_command({
+            'mucnick': 'tester',
+            'mucroom': 'testroom',
+            'body': 'testbot: legacy',
         })
         self.assertEqual(bot.client.msg[0]['mtype'], 'groupchat')
         self.assertEqual(bot.client.msg[0]['mbody'], 'hi tester')

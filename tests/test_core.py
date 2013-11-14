@@ -103,8 +103,7 @@ class BotTestCase(TestCase):
 
     def test_setup_methods(self):
 
-        def dummy():
-            pass
+        dummy = object()
 
         bot = BotCore()
         client = TestClient()
