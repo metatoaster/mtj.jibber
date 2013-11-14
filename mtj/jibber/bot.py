@@ -30,9 +30,6 @@ class Fortune(Command):
     """
     Give a random fortune.
 
-    fortune_file
-        The fortune file.  Requires the ``fortune`` package to be
-        installed.
     fortune_items
         Alternatively, specify a list of strings to be used as fortunes.
 
@@ -51,17 +48,12 @@ class Fortune(Command):
     '<html><body>Tester: <strong>So very strong</strong>.</body></html>'
     """
 
-    def __init__(self, fortune_file=None, fortune_items=None):
-        if fortune_file:
-            import fortune
-            fortune.make_fortune_data_file(fortune_file, quiet=True)
-            self._fortune = lambda: fortune.get_random_fortune(fortune_file)
-        elif fortune_items:
-            self._fortune = lambda: random.choice(fortune_items)
-        else:
-            raise TypeError('specify either fortune_file or fortune_items')
+    def __init__(self, fortune_items=None):
+        if not isinstance(fortune_items, list):
+            raise TypeError('please specify a list of fortune_items')
+        self._fortune = lambda: random.choice(fortune_items)
 
-    def fortune(self, msg, match):
+    def fortune(self, msg, match, **kw):
         fortune = self._fortune().strip()
         if not fortune.startswith('<'):
             return '%s: %s' % (msg['mucnick'], fortune)
