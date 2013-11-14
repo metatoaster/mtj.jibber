@@ -147,3 +147,19 @@ class CtrlTestCase(TestCase):
             self.assertEqual(bot.disconnected, 1)
             self.assertTrue('bot is dying in a fire, attempting to abort...'
                 in out.items)
+
+    def test_cmd_bot_fg_kb(self):
+        class KbFakeBot(FakeBot):
+            def is_alive(self):
+                raise KeyboardInterrupt
+
+        bot = KbFakeBot()
+        cmd = ctrl.JibberCmd(bot)
+        cmd.timeout = 0
+        with capture_stdio() as stdio:
+            in_, out, err = stdio
+            cmd.do_fg(())
+            self.assertEqual(bot.connected, 1)
+            self.assertEqual(bot.disconnected, 1)
+            self.assertFalse('bot is dying in a fire, attempting to abort...'
+                in out.items)
