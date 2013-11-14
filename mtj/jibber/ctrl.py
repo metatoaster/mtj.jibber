@@ -118,7 +118,7 @@ def main(args=None, _bot_cls=MucChatBot, _cmd_cls=JibberCmd):
     # throughout SleekXMPP, we will set the default encoding
     # ourselves to UTF-8.
 
-    if sys.version_info < (3, 0):
+    if sys.version_info < (3, 0): # pragma: no cover
         from sleekxmpp.util.misc_ops import setdefaultencoding
         setdefaultencoding('utf8')
 
@@ -136,7 +136,7 @@ def main(args=None, _bot_cls=MucChatBot, _cmd_cls=JibberCmd):
 
     try:
         import readline
-    except ImportError:
+    except ImportError:  # pragma: no cover
         pass
 
     if parsed_args.command and parsed_args.command != _default:
