@@ -1,6 +1,12 @@
 Changelog
 =========
 
+0.2 - Unreleased
+----------------
+
+- Helpers for dynamic module reloading within debug mode (TODO)
+
+
 0.1 - 2013-11-14
 ----------------
 
