@@ -72,6 +72,23 @@ class JibberCmd(cmd.Cmd):
         return 1
 
 
+class GenerateConfig(argparse.Action):
+    targets = {
+        'server': 'server.config.json.example',
+        'client': 'muc_bot.client.config.json.example',
+        'client_example': 'muc_bot_extended.client.config.json.example',
+    }
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        target = self.targets.get(values)
+        if target:
+            print(read_config(os.path.join(os.path.dirname(__file__),
+                'configs', target)).strip())
+            sys.exit(0)
+        print('Valid template ids are: %s' % ', '.join(self.targets.keys()))
+        sys.exit(2)
+
+
 def get_argparsers():
     parser = argparse.ArgumentParser(description='Controller for mtj.jibber.')
 
@@ -84,6 +101,12 @@ def get_argparsers():
     sp_fg = sp.add_parser(r'fg', help='Run %(prog)s in foreground')
     sp_debug = sp.add_parser(r'debug', help='Open a debug python shell')
     sp_console = sp.add_parser(r'console', help='Console mode (default)')
+
+    parser.add_argument('--gen-config', action=GenerateConfig,
+        help='Generate a skeleton configuration file from this set of '
+            'template ids: server, client, client_example.')
+
+    parser.set_defaults(command='console')
 
     return parser, sp
 
@@ -101,7 +124,8 @@ def main(args=None, _bot_cls=MucChatBot, _cmd_cls=JibberCmd):
     _default = 'console'
     parser, sp = get_argparsers()
 
-    # workaround for an apparent lack of optional subparser
+    # workaround for python2.7's incorrect(?) default usage.
+    # won't be needed in python3.3.
     if not set.intersection(set(args), set(sp.choices.keys())):
         args.append(_default)
 

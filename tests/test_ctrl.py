@@ -1,4 +1,5 @@
 from unittest import TestCase
+import json
 import tempfile
 import sys
 from contextlib import contextmanager
@@ -107,6 +108,37 @@ class CtrlTestCase(TestCase):
         args = [tf.name, tf.name, 'fg']
         result = ctrl.main(args, _bot_cls=FakeBot, _cmd_cls=FakeCmd)
         self.assertEqual(result, 'fg ')
+
+    def test_main_generate_config(self):
+        with capture_stdio() as stdio:
+            in_, out, err = stdio
+            args = ['--gen-config', 'server']
+            self.assertRaises(SystemExit, ctrl.main, args,
+                _bot_cls=FakeBot, _cmd_cls=FakeCmd)
+            self.assertEqual(json.loads(out.items[0])['host'],
+                'talk.example.com')
+
+        with capture_stdio() as stdio:
+            in_, out, err = stdio
+            args = ['--gen-config', 'client']
+            self.assertRaises(SystemExit, ctrl.main, args,
+                _bot_cls=FakeBot, _cmd_cls=FakeCmd)
+            self.assertTrue(isinstance(json.loads(out.items[0]), dict))
+
+        with capture_stdio() as stdio:
+            in_, out, err = stdio
+            args = ['--gen-config', 'client_example']
+            self.assertRaises(SystemExit, ctrl.main, args,
+                _bot_cls=FakeBot, _cmd_cls=FakeCmd)
+            self.assertTrue(isinstance(json.loads(out.items[0]), dict))
+
+    def test_main_generate_config_invalid_id(self):
+        with capture_stdio() as stdio:
+            in_, out, err = stdio
+            args = ['--gen-config', 'server_invalid']
+            self.assertRaises(SystemExit, ctrl.main, args,
+                _bot_cls=FakeBot, _cmd_cls=FakeCmd)
+            self.assertRaises(ValueError, json.loads, out.items[0])
 
     def test_cmd(self):
         bot = FakeBot()

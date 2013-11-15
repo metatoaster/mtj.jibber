@@ -12,7 +12,7 @@
                 ["^Hello %(nickname)s", "say_hi"]
             ]
         },
-        {   
+        {
             "package": "mtj.jibber.bot.PickOne",
             "kwargs": {"items": [
                 "red!", "orange!", "yellow!", "green!", "blue!", "violet!"]},
@@ -20,7 +20,7 @@
                 ["^rainbow (color|colour)!$", "play"]
             ]
         },
-        {   
+        {
             "package": "mtj.jibber.bot.ChanceGame",
             "kwargs": {"chance_table": [
                 [0.125, "%(mucnick)s: BOOM"], [1, "%(mucnick)s: click"]

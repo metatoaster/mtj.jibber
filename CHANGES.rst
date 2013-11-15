@@ -5,6 +5,7 @@ Changelog
 ----------------
 
 - Private chat message handling for private message commands.
+- Core configuration file generation for the tutorial.
 - Helpers for dynamic module reloading within debug mode (TODO)
 
 
