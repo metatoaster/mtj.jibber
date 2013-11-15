@@ -238,7 +238,12 @@ class MucChatBot(MucBotCore):
         for package, method in self.listeners:
             f = getattr(self.objects[package], method)
             try:
-                f(msg=msg)
+                try:
+                    f(msg=msg, bot=self)
+                except TypeError:
+                    f(msg=msg)
+                    logger.info('%s.%s does not accept the `bot` argument',
+                        package, method)
             except:
                 logger.exception('Error calling listener')
 
@@ -296,9 +301,10 @@ class MucChatBot(MucBotCore):
             try:
                 raw_reply = f(msg=msg, match=match, bot=self)
             except TypeError:
-                # legacy package method definition does not accept bot.
-                logger.info('%s.%s does not accept the `bot` argument')
                 raw_reply = f(msg=msg, match=match)
+                # legacy package method definition does not accept bot.
+                logger.info('%s.%s does not accept the `bot` argument',
+                    package, method)
         except:
             logger.exception('Failed to send_package_method')
             return
