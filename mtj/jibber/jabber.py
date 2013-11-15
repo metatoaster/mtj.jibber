@@ -57,11 +57,19 @@ class MucChatBot(MucBotCore):
         Should really be a setup_packages thing.
         """
 
+        self.commands_max_match = self.config.get('commands_max_match', 1)
+        self.commentary_qsize = self.config.get('commentary_qsize', 2)
+
         self.objects = {}
         self.timers = {}
         self.commands = []
-        self.commands_max_match = self.config.get('commands_max_match', 1)
-        self.commentary_qsize = self.config.get('commentary_qsize', 2)
+        self.listeners = []
+        self.commentators = []
+
+        # XXX assuming CPython implementation where this is thread-safe.
+        # As sleekxmpp is multithreaded, this may be a problem in other
+        # implementations of Python.
+        self.commentary = deque([], self.commentary_qsize)
 
         # can't have zero-sized queue for this, see setup using this
         assert self.commentary_qsize > 0
@@ -108,7 +116,6 @@ class MucChatBot(MucBotCore):
                 logger.exception('%s is an invalid command', command)
 
     def setup_listeners(self, package, listeners=None, **configs):
-        self.listeners = []
 
         if not listeners:
             return
@@ -127,12 +134,6 @@ class MucChatBot(MucBotCore):
         is used, controlled by `commentary_qsize`, so that the handler
         will be able to avoid doing this.
         """
-
-        self.commentators = []
-        # XXX assuming CPython implementation where this is thread-safe.
-        # As sleekxmpp is multithreaded, this may be a problem in other
-        # implementations of Python.
-        self.commentary = deque([], self.commentary_qsize)
 
         if not commentators:
             return
