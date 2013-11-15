@@ -4,6 +4,7 @@ Changelog
 0.2 - Unreleased
 ----------------
 
+- Private chat message handling for private message commands.
 - Helpers for dynamic module reloading within debug mode (TODO)
 
 
