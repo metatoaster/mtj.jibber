@@ -36,6 +36,12 @@ class GreeterCommand(Command, Greeter):
     def repeat_you(self, msg, match=None, bot=None):
         return msg['body']
 
+    def pm_reply(self, msg, match, bot=None):
+        return {
+            'raw': 'You said: %s' % ''.join(match.groups()),
+            'mto': msg.get('from', 'nobody@example.com')
+        }
+
     def to_one_target(self, msg, match=None, bot=None):
         return {
             'raw': 'hello target',

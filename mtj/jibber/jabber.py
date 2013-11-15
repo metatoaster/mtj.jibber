@@ -42,8 +42,15 @@ class MucChatBot(MucBotCore):
             self.run_listener,
         ]
 
+        self.message_handlers = [
+            self.run_private_command,
+        ]
+
         self.setup_events(client, [('groupchat_message', f) for f in
             self.groupchat_message_handlers])
+
+        self.setup_events(client, [('message', f) for f in
+            self.message_handlers])
 
         # nickname can be undefined, but we need this to check regex.
         self.nickname = self.config.get('nickname', 'bot')
@@ -62,6 +69,7 @@ class MucChatBot(MucBotCore):
 
         self.objects = {}
         self.timers = {}
+        self.private_commands = []
         self.commands = []
         self.listeners = []
         self.commentators = []
@@ -92,10 +100,26 @@ class MucChatBot(MucBotCore):
         obj = cls(**kwargs)
         obj.bot = self
         self.objects[package] = obj
+        self.setup_private_commands(package, **configs)
         self.setup_commands(package, **configs)
         self.setup_listeners(package, **configs)
         self.setup_commentators(package, **configs)
         self.setup_timers(package, **configs)
+
+    def setup_private_commands(self, package, private_commands=None,
+            **configs):
+        if not private_commands:
+            return
+
+        for command in private_commands:
+            try:
+                trigger, method = command
+                # this is to validate that this is a regex.
+                regex = re.compile(trigger, re.IGNORECASE)
+                self.private_commands.append((trigger, package, method))
+            except:
+                logger.exception('%s maps to an invalid private command',
+                    command)
 
     def setup_commands(self, package, commands=None, **configs):
         if not commands:
@@ -205,6 +229,17 @@ class MucChatBot(MucBotCore):
 
         self.client.schedule(str(args), seconds, self.run_timer,
             (self.send_package_method, args, kwargs), repeat=False)
+
+    def run_private_command(self, msg):
+        if msg.get('type') != 'chat':
+            return
+        for rawregex, package, method in self.private_commands:
+            logger.debug('received:%s', msg)
+            regex = re.compile(rawregex, re.IGNORECASE)
+            match = regex.search(msg['body'])
+            if not match:
+                continue
+            self.send_package_method(package, method, msg=msg, match=match)
 
     def run_command(self, msg):
         if msg['mucnick'] == self.nickname:

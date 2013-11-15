@@ -19,6 +19,9 @@ class MucBotTestCase(TestCase):
 
     def setUp(self):
         self.test_package = 'mtj.jibber.testing.command.GreeterCommand'
+        self.private_commands = [
+            ['^(.*)$', 'pm_reply'],
+        ]
         self.commands = [
             ['^%(nickname)s: hi', 'say_hi'],
             ['^%(nickname)s: legacy', 'say_legacy_hi'],
@@ -34,6 +37,9 @@ class MucBotTestCase(TestCase):
         ]
         self.commentators = []
         self.kwargs = {}
+        self.rebuild_config()
+
+    def rebuild_config(self):
         self.config = {
             'nickname': 'testbot',
             'commands_max_match': 1,
@@ -41,6 +47,7 @@ class MucBotTestCase(TestCase):
                 {
                     'kwargs': self.kwargs,
                     'package': 'mtj.jibber.testing.command.GreeterCommand',
+                    'private_commands': self.private_commands,
                     'commands': self.commands,
                     'commentators': self.commentators,
                     'timers': [
@@ -147,7 +154,7 @@ class MucBotTestCase(TestCase):
         self.assertRaises(AttributeError, bot.send_package_method,
             'error', 'failure')
 
-    def test_setup_triggers(self):
+    def test_setup_commands(self):
         bot = MucChatBot()
         bot.nickname = 'test'
         bot.commands = []
@@ -169,6 +176,29 @@ class MucBotTestCase(TestCase):
             ['(test)', 'command'],
         ])
         self.assertEqual(len(bot.commands), 1)
+
+    def test_setup_private_commands(self):
+        bot = MucChatBot()
+        bot.nickname = 'test'
+        bot.private_commands = []
+        marker = object()
+
+        # null command
+        bot.setup_private_commands(marker, private_commands=None)
+        self.assertEqual(bot.private_commands, [])
+
+        # bad commands
+        bot.setup_private_commands(object(), private_commands=[
+            [], # not enough values
+            ['(', 'command'],  # bad regex
+        ])
+        self.assertEqual(bot.private_commands, [])
+
+        # bad commands
+        bot.setup_private_commands(object(), private_commands=[
+            ['(test)', 'command'],
+        ])
+        self.assertEqual(len(bot.private_commands), 1)
 
     def test_muc_bot_success_command(self):
         bot = self.mk_default_bot()
@@ -218,6 +248,44 @@ class MucBotTestCase(TestCase):
             'body': 'testbot: hi',
         })
 
+        self.assertEqual(len(bot.client.msg), 0)
+
+    def test_muc_bot_success_private_command(self):
+        bot = self.mk_default_bot()
+        # the event handler will send these
+        bot.run_private_command({
+            'type': 'groupchat',
+            'mucnick': 'tester',
+            'mucroom': 'testroom',
+            'body': 'hi',
+        })
+        self.assertEqual(len(bot.client.msg), 0)
+
+        # the event handler will send these
+        bot.run_private_command({
+            'type': 'chat',
+            'body': 'hi',
+        })
+        self.assertEqual(bot.client.msg[0]['mbody'], 'You said: hi')
+
+    def test_muc_bot_success_private_command_no_match(self):
+        self.private_commands = [['^dddd$', 'pm_reply']]
+        self.rebuild_config()
+        bot = self.mk_default_bot()
+        bot.run_private_command({
+            'type': 'chat',
+            'body': 'hi',
+        })
+        self.assertEqual(len(bot.client.msg), 0)
+
+    def test_muc_bot_success_private_command_none(self):
+        self.private_commands = []
+        self.rebuild_config()
+        bot = self.mk_default_bot()
+        bot.run_private_command({
+            'type': 'chat',
+            'body': 'hi',
+        })
         self.assertEqual(len(bot.client.msg), 0)
 
     def test_muc_bot_construct(self):
