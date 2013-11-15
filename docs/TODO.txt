@@ -10,3 +10,5 @@ Cascading response with a stop on trigger
   response and also results in subsequent queries (like detailed
   weather information) to not be reported.
 - Could be marked as an exclusive response, if triggered.
+
+Globally substitute all response with the replacement texts.

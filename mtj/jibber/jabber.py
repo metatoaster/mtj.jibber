@@ -88,6 +88,8 @@ class MucChatBot(MucBotCore):
             self.setup_package(**package)
 
     def setup_package(self, package, kwargs, **configs):
+        # XXX what if there are multiple packages, different startup
+        # arguments?
         ns, clsname = package.rsplit('.', 1)
         cls = getattr(importlib.import_module(ns), clsname)
 
