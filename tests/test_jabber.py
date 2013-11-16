@@ -265,6 +265,7 @@ class MucBotTestCase(TestCase):
         bot.run_private_command({
             'type': 'chat',
             'body': 'hi',
+            'from': 'nobody@example.com',
         })
         self.assertEqual(bot.client.msg[0]['mbody'], 'You said: hi')
 
@@ -275,6 +276,7 @@ class MucBotTestCase(TestCase):
         bot.run_private_command({
             'type': 'chat',
             'body': 'hi',
+            'from': 'nobody@example.com',
         })
         self.assertEqual(len(bot.client.msg), 0)
 
@@ -285,6 +287,7 @@ class MucBotTestCase(TestCase):
         bot.run_private_command({
             'type': 'chat',
             'body': 'hi',
+            'from': 'nobody@example.com',
         })
         self.assertEqual(len(bot.client.msg), 0)
 

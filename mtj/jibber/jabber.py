@@ -241,7 +241,8 @@ class MucChatBot(MucBotCore):
             match = regex.search(msg['body'])
             if not match:
                 continue
-            self.send_package_method(package, method, msg=msg, match=match)
+            self.send_package_method(package, method, msg=msg, match=match,
+                mto=msg.get('from'))
 
     def run_command(self, msg):
         if msg['mucnick'] == self.nickname:
