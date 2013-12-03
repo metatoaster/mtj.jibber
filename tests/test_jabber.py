@@ -46,7 +46,7 @@ class MucBotTestCase(TestCase):
             'packages': [
                 {
                     'kwargs': self.kwargs,
-                    'package': 'mtj.jibber.testing.command.GreeterCommand',
+                    'package': self.test_package,
                     'private_commands': self.private_commands,
                     'commands': self.commands,
                     'commentators': self.commentators,
@@ -199,6 +199,37 @@ class MucBotTestCase(TestCase):
             ['(test)', 'command'],
         ])
         self.assertEqual(len(bot.private_commands), 1)
+
+    def test_setup_package_alias(self):
+        # ensure the default config in this test is what we expect
+        config = {'nickname': 'testbot', 'packages': [
+            {'package': self.test_package,
+                'kwargs': {'a': 'b'},
+                'alias': 'instance_a',
+            },
+            {'package': self.test_package,
+                'kwargs': {'c': 'd'},
+                'alias': 'instance_b',
+            },
+        ]}
+        bot = self.mk_default_bot(config=config)
+        self.assertEqual(sorted(bot.objects.keys()),
+            ['instance_a', 'instance_b'])
+        self.assertEqual(bot.objects['instance_a'].kw, {'a': 'b'})
+        self.assertEqual(bot.objects['instance_b'].kw, {'c': 'd'})
+
+    def test_setup_package_method_send_as_alias(self):
+        # ensure the default config in this test is what we expect
+        self.assertEqual(self.config['packages'][0]['package'],
+            'mtj.jibber.testing.command.GreeterCommand')
+        self.config['packages'][0]['alias'] = 'hello'
+        bot = self.mk_default_bot()
+        bot.send_package_method('hello', 'say_hello_all',
+             mto='test@chat.example.com')
+        self.assertEqual(bot.client.msg, [
+            {'mbody': 'hello all', 'mto': 'test@chat.example.com',
+            'mhtml': None},
+        ])
 
     def test_muc_bot_success_command(self):
         bot = self.mk_default_bot()

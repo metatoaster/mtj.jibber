@@ -87,7 +87,7 @@ class MucChatBot(MucBotCore):
         for package in packages:
             self.setup_package(**package)
 
-    def setup_package(self, package, kwargs, **configs):
+    def setup_package(self, package, kwargs, alias=None, **configs):
         # XXX what if there are multiple packages, different startup
         # arguments?
         ns, clsname = package.rsplit('.', 1)
@@ -101,7 +101,15 @@ class MucChatBot(MucBotCore):
 
         obj = cls(**kwargs)
         obj.bot = self
-        self.objects[package] = obj
+        if alias is None:
+            alias = package
+        self.objects[alias] = obj
+
+        self.setup_package_instance(alias, **configs)
+
+    def setup_package_instance(self, package, **configs):
+        # XXX the parameter `package` was really mapped to a package, but
+        # is now a name.
         self.setup_private_commands(package, **configs)
         self.setup_commands(package, **configs)
         self.setup_listeners(package, **configs)

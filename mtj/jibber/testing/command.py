@@ -20,15 +20,15 @@ class Greeter(object):
 
 class GreeterCommand(Command, Greeter):
     def __init__(self, *a, **kw):
-        self.a = str(a)
-        self.kw = str(kw)
+        self.a = a
+        self.kw = kw
         self.listened = []
 
     def say_a(self, msg, match, bot=None):
-        return self.a
+        return str(self.a)
 
     def say_kw(self, msg, match, bot=None):
-        return self.kw
+        return str(self.kw)
 
     def listener(self, msg, match=None, bot=None):
         return self.listened.append(msg)
