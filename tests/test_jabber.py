@@ -420,6 +420,62 @@ class MucBotTestCase(TestCase):
         self.assertEqual(len(bot.client.scheduler), 2)
         self.assertEqual(len(bot.client.schedules), 3)
 
+    def test_muc_bot_timers_multi(self):
+        bot = MucChatBot()
+        bot.client = TestClient()
+        bot.nickname = 'testbot'
+        bot.config = {'nickname': 'testbot', 'packages': [
+            {'package': self.test_package,
+                'kwargs': {'a': 'b'},
+                'alias': 'instance_a',
+                'timers': [
+                    {
+                        'mtype': 'groupchat',
+                        'mto': 'testing@chat.example.com',
+                        'schedule': self.schedule,
+                    },
+                ],
+            },
+            {'package': self.test_package,
+                'kwargs': {'c': 'd'},
+                'alias': 'instance_b',
+                'timers': [
+                    {
+                        'mtype': 'groupchat',
+                        'mto': 'testing@chat.example.com',
+                        'schedule': self.schedule,
+                    },
+                ],
+            },
+        ]}
+        bot.setup_packages()
+
+        self.assertEqual(bot.timers, {
+            ('instance_a', 'say_hello_all'):
+                ((7200, 14400), {
+                    'mtype': 'groupchat', 'mto': 'testing@chat.example.com',
+                }),
+            ('instance_a', 'report_time'):
+                (1800, {
+                    'mtype': 'groupchat', 'mto': 'testing@chat.example.com',
+                }),
+            ('instance_b', 'say_hello_all'):
+                ((7200, 14400), {
+                    'mtype': 'groupchat', 'mto': 'testing@chat.example.com',
+                }),
+            ('instance_b', 'report_time'):
+                (1800, {
+                    'mtype': 'groupchat', 'mto': 'testing@chat.example.com',
+                })
+        })
+
+        self.assertEqual(sorted(bot.client.schedules), [
+            "('instance_a', 'report_time')",
+            "('instance_a', 'say_hello_all')",
+            "('instance_b', 'report_time')",
+            "('instance_b', 'say_hello_all')",
+        ])
+
     def test_muc_bot_listeners_null(self):
         bot = MucChatBot()
         bot.client = TestClient()
