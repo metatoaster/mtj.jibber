@@ -87,6 +87,9 @@ class MucChatBot(MucBotCore):
         for package in packages:
             self.setup_package(**package)
 
+        for timer in self.timers.keys():
+            self.register_timer(timer)
+
     def setup_package(self, package, kwargs, alias=None, **configs):
         # XXX what if there are multiple packages, different startup
         # arguments?
@@ -222,9 +225,6 @@ class MucChatBot(MucBotCore):
                 'valid value is either an int or a tuple of two integers '
                 'specifying the range of possible delays.  Ignored.',
                 seconds.__repr__(), method, package)
-
-        for timer in self.timers.keys():
-            self.register_timer(timer)
 
     def register_timer(self, args):
         try:
