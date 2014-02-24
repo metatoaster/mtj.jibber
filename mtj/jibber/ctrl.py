@@ -48,6 +48,10 @@ class JibberCmd(cmd.Cmd):
         """
 
         def bot_test():
+            if self.bot.client is not None:
+                print("Error: Bot already has an active client.")
+                return
+
             from mtj.jibber.testing.client import TestClient
             self.bot.client = TestClient()
             self.bot.setup_client()

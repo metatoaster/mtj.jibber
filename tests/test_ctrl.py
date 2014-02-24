@@ -39,6 +39,7 @@ def capture_stdio(inputs=''):
 class FakeBot(object):
     connected = disconnected = 0
     alive = 1
+    client = None
     def setup_client(self):
         pass
     def connect(self):
@@ -154,6 +155,23 @@ class CtrlTestCase(TestCase):
             cmd.do_debug(())
             self.assertEqual(out.items[1],
                 "Test client ready; call client('Hello bot') to interact.")
+            cmd.do_EOF(())
+
+    def test_cmd_bot_debug_bot_test_no_double(self):
+        bot = FakeBot()
+        cmd = ctrl.JibberCmd(bot)
+        client = None
+        with capture_stdio('bot_test()\n') as stdio:
+            in_, out, err = stdio
+            cmd.do_debug(())
+            client = bot.client
+
+        with capture_stdio('bot_test()\n') as stdio:
+            in_, out, err = stdio
+            cmd.do_debug(())
+            self.assertEqual(client, bot.client)
+            self.assertEqual(out.items[1],
+                "Error: Bot already has an active client.")
             cmd.do_EOF(())
 
     def test_cmd_bot_fg(self):
