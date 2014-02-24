@@ -41,3 +41,19 @@ class TestClientTestCase(TestCase):
         self.assertEqual(bot.client.sent, ['hi Tester'])
 
         bot.disconnect()
+
+    def test_muc_bot_no_double_setup_client(self):
+        bot = MucChatBot()
+        client = TestClient()
+
+        bot.client = client
+        bot.config = self.config
+
+        # As the setup is faked..
+        bot._muc_setup = True
+        bot.setup_client()
+
+        # would have not got the hooks to setup so that the triggers
+        # would not be registered to allow the following.
+        client('testbot: hi')
+        self.assertNotEqual(bot.client.sent, ['hi Tester'])
