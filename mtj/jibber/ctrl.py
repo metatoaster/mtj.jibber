@@ -66,7 +66,8 @@ class JibberCmd(cmd.Cmd):
         result = console.interact(
             'Starting interactive shell. '
             '`bot` is bound to the MucBot object.\n'
-            'Try calling bot.connect() to connect to the server specified.\n'
+            'Try calling bot.connect() to connect to the server specified in '
+                'config file.\n'
             'Note: process will NOT terminate if bot.is_alive() is False!\n'
             'Alternatively call bot_test() to test here locally.')
         self.bot.disconnect()
