@@ -65,6 +65,21 @@ class MucChatBot(MucBotCore):
 
         self.setup_packages()
 
+    def clear_timers(self):
+        """
+        Removes _all_ timers from the scheduler.
+        """
+
+        timers = getattr(self, 'timers', {})
+
+        for args, v in timers.items():
+            try:
+                self.client.scheduler.remove(str(args))
+            except ValueError:
+                pass
+
+        self.timers = {}
+
     def setup_packages(self):
         """
         This is a fairly unsafe method.  Check your configs source.
@@ -76,7 +91,7 @@ class MucChatBot(MucBotCore):
         self.commentary_qsize = self.config.get('commentary_qsize', 2)
 
         self.objects = {}
-        self.timers = {}
+        self.clear_timers()
         self.private_commands = []
         self.commands = []
         self.listeners = []
@@ -238,6 +253,7 @@ class MucChatBot(MucBotCore):
         try:
             self.client.scheduler.remove(str(args))
         except ValueError:
+            logger.warning('%s not in schedule?', args)
             pass
         seconds, kwargs = self.timers[args]
 
@@ -331,7 +347,6 @@ class MucChatBot(MucBotCore):
                 self.commentary.append(sent_msg)
                 # and we are done; maximum one commentary for now.
                 break
-
 
     def run_timer(self, method, args, kwargs):
         result = method(*args, **kwargs)
