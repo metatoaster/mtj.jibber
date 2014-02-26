@@ -16,7 +16,7 @@ from mtj.jibber.utils import strip_tags
 
 logger = logging.getLogger('mtj.jibber.jabber')
 
-if sys.version_info > (3, 0):
+if sys.version_info > (3, 0):  # pragma: no cover
     unicode = str
 
 
@@ -311,7 +311,8 @@ class MucChatBot(MucBotCore):
             try:
                 try:
                     f(msg=msg, bot=self)
-                except TypeError:
+                except TypeError:  # pragma: no cover
+                    # XXX deprecated
                     f(msg=msg)
                     logger.info('%s.%s does not accept the `bot` argument',
                         package, method)
