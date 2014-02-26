@@ -13,6 +13,7 @@ import tempfile
 import time
 
 from mtj.jibber.jabber import MucChatBot
+from mtj.jibber.utils import read_config
 
 
 class JibberCmd(cmd.Cmd):
@@ -115,13 +116,6 @@ def get_argparsers():
 
     return parser, sp
 
-def read_config(config):
-    try:
-        with open(config) as fd:
-            return fd.read()
-    except IOError:
-        print('cannot load config file `%s`' % config)
-
 def main(args=None, _bot_cls=MucChatBot, _cmd_cls=JibberCmd):
     if args is None:
         args = sys.argv[1:]
@@ -136,12 +130,6 @@ def main(args=None, _bot_cls=MucChatBot, _cmd_cls=JibberCmd):
 
     parsed_args = parser.parse_args(args)
 
-    s_config = read_config(parsed_args.server_config)
-    c_config = read_config(parsed_args.client_config)
-
-    if not s_config or not c_config:
-        return
-
     # Python versions before 3.0 do not use UTF-8 encoding
     # by default. To ensure that Unicode is handled properly
     # throughout SleekXMPP, we will set the default encoding
@@ -152,8 +140,12 @@ def main(args=None, _bot_cls=MucChatBot, _cmd_cls=JibberCmd):
         setdefaultencoding('utf8')
 
     bot = _bot_cls()
-    bot.load_server_config(s_config)
-    bot.load_client_config(c_config)
+    if bot.load_server_config_from_path(parsed_args.server_config) is None:
+        print("Server config file `%s` not found." % parsed_args.server_config)
+        return
+    if bot.load_client_config_from_path(parsed_args.client_config) is None:
+        print("Client config file `%s` not found." % parsed_args.client_config)
+        return
 
     c = _cmd_cls(bot)
 

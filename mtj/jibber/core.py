@@ -4,6 +4,8 @@ import json
 
 from sleekxmpp import ClientXMPP
 
+from mtj.jibber.utils import ConfigFile
+
 logger = logging.getLogger('mtj.jibber.core')
 
 
@@ -29,7 +31,10 @@ class BotCore(object):
 
         self.client = None
         self.config = {}
-        self.s_config = {}
+        self.s_config = {}  # server config is distinct.
+
+        self._raw_config = None
+        self._raw_s_config = {}  # server config helper is distinct.
 
         if s_config is not None:
             self.load_server_config(s_config)
@@ -49,6 +54,22 @@ class BotCore(object):
         self.port = int(c.pop('port', self.port))
         self.s_config = c
 
+    def load_client_config(self, c_config):
+        return self.config.update(json.loads(c_config))
+
+    def load_server_config_from_path(self, s_config_path):
+        self._raw_s_config = ConfigFile(s_config_path, self.load_server_config)
+        return self._raw_s_config.load()
+
+    def load_client_config_from_path(self, c_config_path):
+        self._raw_config = ConfigFile(c_config_path, self.load_client_config)
+        return self._raw_config.load()
+
+    def reload_client_config(self):
+        self.config.clear()
+        if self._raw_config:
+            return self._raw_config.load()
+
     @property
     def address(self):
         if self.host is None:
@@ -57,9 +78,6 @@ class BotCore(object):
 
     def is_alive(self):
         return True
-
-    def load_client_config(self, c_config):
-        self.config.update(json.loads(c_config))
 
     def setup_client(self):
         """

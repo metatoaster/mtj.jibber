@@ -1,4 +1,5 @@
 from unittest import TestCase
+import tempfile
 
 from mtj.jibber.core import BotCore
 from mtj.jibber.core import MucBotCore
@@ -61,7 +62,18 @@ class BotTestCase(TestCase):
             '"host": "talk.example.com", "port": 52222}')
         self.assertEqual(bot.address, ('talk.example.com', 52222))
 
-    def test_bot_client_config(self):
+    def test_bot_core_server_config_file(self):
+        tf = tempfile.NamedTemporaryFile()
+        tf.write(b'{"jid": "test@example.com/res", "password": "passwd"}')
+        tf.flush()
+
+        bot = BotCore()
+        bot.load_server_config_from_path(tf.name)
+        self.assertEqual(bot.jid, 'test@example.com/res')
+        self.assertEqual(bot.password, 'passwd')
+        self.assertEqual(bot.address, None)
+
+    def test_bot_core_client_config(self):
         bot = BotCore()
         bot.load_client_config('{"test": "1234"}')
         self.assertEqual(bot.config, {'test': '1234'})
@@ -69,6 +81,23 @@ class BotTestCase(TestCase):
         self.assertEqual(bot.config, {'test': '12345'})
         bot.load_client_config('{"key": ["a", "b"]}')
         self.assertEqual(bot.config, {'test': '12345', 'key': ['a', 'b']})
+
+    def test_bot_core_client_config_file(self):
+        tf = tempfile.NamedTemporaryFile()
+        tf.write(b'{"test": "12345", "key": ["a", "b"]}')
+        tf.flush()
+
+        bot = BotCore()
+        bot.load_client_config_from_path(tf.name)
+        self.assertEqual(bot.config, {'test': '12345', 'key': ['a', 'b']})
+
+        # also test reloading here.
+        tf.truncate(0)
+        tf.seek(0)
+        tf.write(b'{"test_key": ":effort:"}')
+        tf.flush()
+        bot.reload_client_config()
+        self.assertEqual(bot.config, {'test_key': ':effort:'})
 
     def test_connect(self):
         class TestClient(object):

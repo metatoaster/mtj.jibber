@@ -49,10 +49,10 @@ class FakeBot(object):
     def is_alive(self):
         self.alive -= 1
         return self.alive
-    def load_server_config(self, cfg):
-        pass
-    def load_client_config(self, cfg):
-        pass
+    def load_server_config_from_path(self, cfg):
+        return cfg[1:] or None
+    def load_client_config_from_path(self, cfg):
+        return cfg[1:] or None
 
 class FakeCmd(object):
     def __init__(self, bot):
@@ -81,17 +81,25 @@ class CtrlTestCase(TestCase):
             self.assertRaises(SystemExit, ctrl.main)
             self.assertTrue('usage:' in err.items[0])
 
-    def test_read_config(self):
-        tf = tempfile.NamedTemporaryFile()
-        tf.write(b'test')
-        tf.flush()
-        self.assertEqual(ctrl.read_config(tf.name), 'test')
-
     def test_main(self):
         args = ['server.json', 'client.json']
         ctrl.main(args, _bot_cls=FakeBot, _cmd_cls=FakeCmd)
         # workaround appended
         self.assertEqual(args[-1], 'console')
+
+    def test_main_no_server_config(self):
+        with capture_stdio() as stdio:
+            in_, out, err = stdio
+            args = ['s', ' ']
+            ctrl.main(args, _bot_cls=FakeBot, _cmd_cls=FakeCmd)
+            self.assertEqual(out.items[0], 'Server config file `s` not found.')
+
+    def test_main_no_client_config(self):
+        with capture_stdio() as stdio:
+            in_, out, err = stdio
+            args = ['server.json', 'c']
+            ctrl.main(args, _bot_cls=FakeBot, _cmd_cls=FakeCmd)
+            self.assertEqual(out.items[0], 'Client config file `c` not found.')
 
     def test_main_console(self):
         tf = tempfile.NamedTemporaryFile()
