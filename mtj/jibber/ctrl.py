@@ -59,9 +59,15 @@ class JibberCmd(cmd.Cmd):
             console.locals[b'client'] = self.bot.client
             print("Test client ready; call client('Hello bot') to interact.")
 
+        def bot_reinit():
+            c = self.bot.reload_client_config()
+            self.bot.setup_packages()
+            print("Successfully reinitialized bot configuration and modules.")
+
         console = code.InteractiveConsole(locals={
             'bot': self.bot,
             'bot_test': bot_test,
+            'bot_reinit': bot_reinit,
         })
 
         result = console.interact(

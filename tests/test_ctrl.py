@@ -53,6 +53,10 @@ class FakeBot(object):
         return cfg[1:] or None
     def load_client_config_from_path(self, cfg):
         return cfg[1:] or None
+    def reload_client_config(self):
+        return True
+    def setup_packages(self):
+        return
 
 class FakeCmd(object):
     def __init__(self, bot):
@@ -180,6 +184,16 @@ class CtrlTestCase(TestCase):
             self.assertEqual(client, bot.client)
             self.assertEqual(out.items[1],
                 "Error: Bot already has an active client.")
+            cmd.do_EOF(())
+
+    def test_cmd_bot_reinit(self):
+        bot = FakeBot()
+        cmd = ctrl.JibberCmd(bot)
+        with capture_stdio('bot_test()\nbot_reinit()\n') as stdio:
+            in_, out, err = stdio
+            cmd.do_debug(())
+            self.assertEqual(out.items[4],
+                "Successfully reinitialized bot configuration and modules.")
             cmd.do_EOF(())
 
     def test_cmd_bot_fg(self):

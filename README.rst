@@ -232,3 +232,24 @@ Fill out the correct information (the jid/password/host and the rooms
 you wish your bot to join) and then you can call ``bot.connect()``!
 Alternatively you can replace ``debug`` with ``fg`` to have it connect
 right away and ditch the interactive shell.
+
+Bonus
+-----
+
+If you find yourself constantly restarting the bot completely because a
+single line of code or setting was changed and also finding this process
+tiresome, there is a helper method in the debug shell that will reload
+the client configuration file and all modules with the associated timers
+and triggers with just one function call:
+
+.. code:: python
+
+    >>> bot_reinit()
+    Successfully reinitialized bot configuration and modules.
+    >>>
+
+Do note: this function is potentially unsafe.  Syntax errors in the
+configuration or the modules that got added after the bot has started
+will be raised as exceptions and loading is aborted, leaving the bot
+in a fresh but partially instantiated state.  This may or may not cause
+problems specific to the code/modules you have loaded with the bot.
