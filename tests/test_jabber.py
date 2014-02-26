@@ -476,6 +476,26 @@ class MucBotTestCase(TestCase):
             "('instance_b', 'say_hello_all')",
         ])
 
+    def test_muc_bot_timers_clear(self):
+        bot = self.mk_default_bot()
+        self.assertEqual(len(bot.timers), 2)
+        self.assertEqual(len(bot.client.scheduler), 2)
+        bot.clear_timers()
+
+        self.assertEqual(len(bot.timers), 0)
+        self.assertEqual(len(bot.client.scheduler), 0)
+
+    def test_muc_bot_timers_clear_failsafe(self):
+        bot = self.mk_default_bot()
+        # force in a broken timer.
+        bot.timers[('mtj.jibber.testing.command.GreeterCommand', 'dummy')] = \
+            (1800, {'mtype': 'groupchat', 'mto': 'testing@chat.example.com',})
+
+        # should still clear.
+        bot.clear_timers()
+        self.assertEqual(len(bot.timers), 0)
+        self.assertEqual(len(bot.client.scheduler), 0)
+
     def test_muc_bot_listeners_null(self):
         bot = MucChatBot()
         bot.client = TestClient()
@@ -609,6 +629,10 @@ class MucBotTestCase(TestCase):
             'body': 'repeat: hello you',
         })
         self.assertEqual(len(bot.client.msg), 1)
+
+    def test_muc_bot_commentary_qsize_fail(self):
+        self.config['commentary_qsize'] = 0
+        self.assertRaises(ValueError, self.mk_default_bot)
 
     def test_run_timer(self):
         bot = self.mk_default_bot()
