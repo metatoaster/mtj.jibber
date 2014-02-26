@@ -97,13 +97,14 @@ class MucChatBot(MucBotCore):
         self.listeners = []
         self.commentators = []
 
+        # can't have zero-sized queue for this, see setup using this
+        if not self.commentary_qsize > 0:
+            raise ValueError('commentary_qsize must be greater than 0')
+
         # XXX assuming CPython implementation where this is thread-safe.
         # As sleekxmpp is multithreaded, this may be a problem in other
         # implementations of Python.
         self.commentary = deque([], self.commentary_qsize)
-
-        # can't have zero-sized queue for this, see setup using this
-        assert self.commentary_qsize > 0
 
         packages = self.config.get('packages')
 
