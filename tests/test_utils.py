@@ -1,4 +1,4 @@
-from unittest import TestCase 
+from unittest import TestCase
 import tempfile
 
 from mtj.jibber import utils
