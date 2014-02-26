@@ -1,4 +1,5 @@
 import importlib
+from imp import reload
 import logging
 import re
 import json
@@ -115,10 +116,11 @@ class MucChatBot(MucBotCore):
             self.register_timer(timer)
 
     def setup_package(self, package, kwargs, alias=None, **configs):
-        # XXX what if there are multiple packages, different startup
-        # arguments?
         ns, clsname = package.rsplit('.', 1)
-        cls = getattr(importlib.import_module(ns), clsname)
+        mod = importlib.import_module(ns)
+        # force module reloading.
+        mod = reload(mod)
+        cls = getattr(mod, clsname)
 
         if not issubclass(cls, Command):
             logger.warning(
