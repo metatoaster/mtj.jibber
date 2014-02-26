@@ -37,6 +37,9 @@ Naturally I will assume you got a virtualenv setup, too:
     $ cd mtj.jibber
     $ python setup.py develop
 
+Of course, in that case you should follow the documentation as listead
+in the README.rst found at the root of the source repository.
+
 Quick Start Tutorial
 ====================
 
