@@ -367,8 +367,8 @@ class MucChatBot(MucBotCore):
             response.update(raw_reply)
             self.send_message(**response)
 
-        f = getattr(self.objects[package], method)
         try:
+            f = getattr(self.objects[package], method)
             msg = kwargs.pop('msg', {})
             match = kwargs.pop('match', None)
             try:

@@ -148,11 +148,11 @@ class MucBotTestCase(TestCase):
         # error should be logged
         self.assertEqual(bot.client.msg, [])
 
-        # for whatever reason, if somehow things got mangled inside...
-        # eventually if we allow low level reloading we might have to
-        # trap this also.
-        self.assertRaises(AttributeError, bot.send_package_method,
-            'error', 'failure')
+        # it is possible to remove objects completely while inside the
+        # debugger, in that case the failure should be logged and fail
+        # silently.
+        result = bot.send_package_method('error', 'failure')
+        self.assertIsNone(result)
 
     def test_setup_commands(self):
         bot = MucChatBot()
