@@ -399,6 +399,9 @@ class MucChatBot(MucBotCore):
         return raw_reply
 
     def send_message(self, raw, mto, **kwargs):
+        if not type(raw) in (str, unicode):
+            return
+
         # TODO make a better way to determine if HTML.
         if (raw.startswith('<p>') or raw.startswith('<html>') or
                 raw.startswith('<!')):

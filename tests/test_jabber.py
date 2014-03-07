@@ -82,6 +82,11 @@ class MucBotTestCase(TestCase):
         self.kwargs.clear()
         self.kwargs.update(kwargs)
 
+    def test_send_message_none(self):
+        bot = self.mk_default_bot()
+        bot.send_message(raw=None, mto='')
+        self.assertEqual(bot.client.msg, [])
+
     def test_send_message_text(self):
         bot = self.mk_default_bot()
         bot.send_message(raw='test', mto='')
