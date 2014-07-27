@@ -399,28 +399,88 @@ class MucChatBot(MucBotCore):
 
         return raw_reply
 
-    def send_message(self, raw, mto, **kwargs):
-        if not type(raw) in (str, unicode):
+    def send_message(self, mto, raw=None, **kwargs):
+        """
+        Shorthanded send_message method that will auto-detect input and
+        process them into the correct mbody and mhtml arguments before
+        passing that to the underlying client's send_message method if
+        and only if the relevant kwargs are not also provided, as it
+        will also pass along all the kwargs.
+
+        Rules of argument handling:
+
+        - `raw` argument takes the lowest priority.  Do not pass along
+          `mbody` or `mhtml` arguments if this default shortcut to
+          generate both HTML and plain text is desired.  Conversion to
+          html will be triggered `mhtml` is not already specified, and
+          if an expected start-tag is detected (which is any strings that
+          starts with `<p>`, `<html>` or `<body>` (case-insensitive), and
+          then leaving the `mbody` with the same value but with all html
+          tags stripped.
+
+        - `mbody` will never be converted to html or have tags stripped,
+          however if a `raw` value is provided, any html derived as per
+          above will be passed as `mhtml`.
+
+        - `mhtml` will be converted using `sleekxmpp.xmlstream.ET.XML`
+          into html.  On success, HTML will be sent along with the
+          plain text as derived using the above rules.  Failure will
+          mean that no HTML will be sent, instead the `raw` or `mbody`
+          will be sent as plain text.
+        """
+
+        # see if we can skip dealing with html
+        _mbody = kwargs.pop('mbody', None)
+        mhtml = kwargs.pop('mhtml', None)
+        mbody = _mbody or raw
+
+        if not type(mbody) in (str, unicode):
+            if mhtml:
+                # TODO add info on what package caused this and elevate to
+                # warning
+                logger.info('raw or detected body is not a string but html '
+                    'was specified, however this is ignored.')
+            # just simply fail this, until we have a better way to track
+            # this.
             return
 
-        # TODO make a better way to determine if HTML.
-        if (raw.startswith('<p>') or raw.startswith('<html>') or
-                raw.startswith('<!')):
-            reply_html = str(raw)
-            reply_txt = strip_tags(raw)
-        else:
-            reply_html = None
-            reply_txt = raw
+        if mhtml is None and type(raw) in (str, unicode):
+            # figure out if we can coerce the raw string into html
+            # just check first-n characters.
+            ss = raw[:10].lower()
+            checks = ('<p>', '<html>', '<body>',)
+
+            if any((ss.startswith(check) for check in checks)):
+                # raw is an html candidate.
+                mhtml = raw
+
+        # now attempt html conversion.
+        if not mhtml is None:
+            try:
+                mhtml = ET.XML(mhtml)
+                if _mbody is None:
+                    # mbody not explicitly defined
+                    mbody = strip_tags(raw)
+            except ET.ParseError:
+                logger.warning(
+                    'An attempt to send the following as html has failed.'
+                    '----------\n%s'
+                    '\n----------\n'
+                    'retrying with just plain text', mhtml
+                )
+                # no more html
+                mhtml = None
 
         try:
-            self.client.send_message(mto=mto, mbody=reply_txt,
-                mhtml=reply_html, **kwargs)
-        except ET.ParseError:
-            logger.warning(
-                'The following html was to be sent but it is invalid xml'
-                '----------\n%s'
-                '\n----------\n'
-                'retrying with just plain text',
-                reply_html
-            )
-            self.client.send_message(mto=mto, mbody=raw, **kwargs)
+            # TODO verify that values to be sent doesn't have control
+            # characters which cause disconnection?  At least no more
+            # crashes.
+            self.client.send_message(mto=mto, mbody=mbody, mhtml=mhtml,
+                **kwargs)
+        except Exception:
+            logger.exception('send_message somehow failed! message: %s', {
+                'mto': mto,
+                'mbody': mbody,
+                'mhtml': mhtml,
+                'kwargs': kwargs,
+            })

@@ -11,6 +11,8 @@ class TestClient(object):
         self.schedules = []  # for checking all added timers
         self.scheduler = []  # for mimicking the remove method
     def send_message(self, *a, **kw):
+        if kw.get('die'):
+            raise Exception()
         if kw.get('mhtml'):
             # simulate parsing of HTML
             html = ET.XML(kw['mhtml'])
@@ -100,19 +102,122 @@ class MucBotTestCase(TestCase):
 
     def test_send_message_html(self):
         bot = self.mk_default_bot()
+
         bot.send_message(raw='<p>test</p>', mto='')
-        self.assertEqual(bot.client.msg[-1],
-            {'mbody': 'test', 'mhtml': '<p>test</p>', 'mto': '',})
+        msg = bot.client.msg[-1]
+        html = msg.pop('mhtml')
+        self.assertEqual(html.tag, 'p')
+        self.assertEqual(html.text, 'test')
+        self.assertEqual(msg, {'mbody': 'test', 'mto': '',})
+
+        bot.send_message(raw='<body>test</body>', mto='')
+        msg = bot.client.msg[-1]
+        html = msg.pop('mhtml')
+        self.assertEqual(html.tag, 'body')
+        self.assertEqual(html.text, 'test')
+        self.assertEqual(msg, {'mbody': 'test', 'mto': '',})
 
         bot.send_message(raw='<html>test</html>', mto='')
-        self.assertEqual(bot.client.msg[-1],
-            {'mbody': 'test', 'mhtml': '<html>test</html>', 'mto': '',})
+        msg = bot.client.msg[-1]
+        html = msg.pop('mhtml')
+        self.assertEqual(html.tag, 'html')
+        self.assertEqual(html.text, 'test')
+        self.assertEqual(msg, {'mbody': 'test', 'mto': '',})
 
     def test_send_message_malformed_html(self):
         bot = self.mk_default_bot()
         bot.send_message(raw='<p>test', mto='')
         # mhtml should be omitted, with the raw html sent instead.
-        self.assertEqual(bot.client.msg[-1], {'mbody': '<p>test', 'mto': '',})
+        self.assertEqual(bot.client.msg[-1],
+            {'mbody': '<p>test', 'mhtml': None, 'mto': '',})
+
+    def test_send_message_unexpected_failure(self):
+        bot = self.mk_default_bot()
+        # should continue normally.
+        bot.send_message(raw='test', mto='', die=1)
+        # no messages should have been sent, however.
+        self.assertFalse(bot.client.msg)
+
+    def test_send_message_override_mhtml(self):
+        # where the bot generated and passed the mhtml keyword.
+        bot = self.mk_default_bot()
+        bot.send_message(mto='', mhtml='<p>test</p>')
+        # raw must be provided.
+        self.assertFalse(bot.client.msg)
+
+        bot.send_message(mto='', mhtml='<p>test</p>', raw=object)
+        # again, valid raw must be provided.
+        self.assertFalse(bot.client.msg)
+
+        bot.send_message(raw='<p>plain</p>', mto='', mhtml='<p>html</p>')
+        msg = bot.client.msg[-1]
+        html = msg.pop('mhtml')
+        self.assertEqual(html.tag, 'p')
+        self.assertEqual(html.text, 'html')
+        # raw message will undergo tag stripping and not override the
+        # specified html.
+        self.assertEqual(msg, {'mbody': 'plain', 'mto': '',})
+
+        bot.send_message(raw='<p>plain</p>', mto='', mhtml='<p>malformed')
+        msg = bot.client.msg[-1]
+        # the malformed mhtml is simply discarded.
+        html = msg.pop('mhtml')
+        self.assertIsNone(html)
+        # tags will not be stripped from the "valid" raw, highlighting
+        # the potential pitfalls of relying on both automatic and manual
+        # arguments.
+        self.assertEqual(msg, {'mbody': '<p>plain</p>', 'mto': '',})
+
+    def test_send_message_override_mbody(self):
+        # where the bot generated and passed the mbody keyword.  note
+        # that html conversion will not be triggered.
+        bot = self.mk_default_bot()
+        bot.send_message(mbody='<p>test</p>', mto='')
+        msg = bot.client.msg[-1]
+        self.assertEqual(msg,
+            {'mbody': '<p>test</p>', 'mhtml': None, 'mto': '',})
+
+        # the bad `raw` value will not be touched.
+        bot.send_message(mbody='<p>test</p>', raw=object, mto='')
+        msg = bot.client.msg[-1]
+        self.assertEqual(msg,
+            {'mbody': '<p>test</p>', 'mhtml': None, 'mto': '',})
+
+        # good `raw` value will simply be not used as it's overriden.
+        bot.send_message(mbody='<p>test</p>', raw='test', mto='')
+        msg = bot.client.msg[-1]
+        self.assertEqual(msg,
+            {'mbody': '<p>test</p>', 'mhtml': None, 'mto': '',})
+
+        # however passing a `raw` that can be converted into html, it
+        # will be converted into html.
+        bot.send_message(mbody='<p>test</p>', raw='<p>test</p>', mto='')
+        msg = bot.client.msg[-1]
+        html = msg.pop('mhtml')
+        self.assertEqual(html.tag, 'p')
+        self.assertEqual(html.text, 'test')
+        self.assertEqual(msg, {'mbody': '<p>test</p>', 'mto': '',})
+
+    def test_send_message_override_mbody_and_mhtml(self):
+        # where the bot generated and passed the mbody keyword.
+        bot = self.mk_default_bot()
+        bot.send_message(mbody='<p>test</p>', mhtml='<p>test</p>', mto='')
+        msg = bot.client.msg[-1]
+        html = msg.pop('mhtml')
+        self.assertEqual(html.tag, 'p')
+        self.assertEqual(html.text, 'test')
+        self.assertEqual(msg,
+            {'mbody': '<p>test</p>', 'mto': '',})
+
+        # raw will simply be not used
+        bot.send_message(mbody='<p>test</p>', mhtml='<p>test</p>',
+            raw='raw', mto='')
+        msg = bot.client.msg[-1]
+        html = msg.pop('mhtml')
+        self.assertEqual(html.tag, 'p')
+        self.assertEqual(html.text, 'test')
+        self.assertEqual(msg,
+            {'mbody': '<p>test</p>', 'mto': '',})
 
     def test_send_package_method_text(self):
         bot = self.mk_default_bot()
