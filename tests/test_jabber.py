@@ -1,5 +1,7 @@
 from unittest import TestCase
 
+from sleekxmpp.xmlstream import ET
+
 from mtj.jibber.jabber import MucChatBot
 
 
@@ -9,6 +11,9 @@ class TestClient(object):
         self.schedules = []  # for checking all added timers
         self.scheduler = []  # for mimicking the remove method
     def send_message(self, *a, **kw):
+        if kw.get('mhtml'):
+            # simulate parsing of HTML
+            html = ET.XML(kw['mhtml'])
         self.msg.append(kw)
     def schedule(self, name, seconds, *a, **kw):
         self.schedules.append(name)
@@ -102,6 +107,12 @@ class MucBotTestCase(TestCase):
         bot.send_message(raw='<html>test</html>', mto='')
         self.assertEqual(bot.client.msg[-1],
             {'mbody': 'test', 'mhtml': '<html>test</html>', 'mto': '',})
+
+    def test_send_message_malformed_html(self):
+        bot = self.mk_default_bot()
+        bot.send_message(raw='<p>test', mto='')
+        # mhtml should be omitted, with the raw html sent instead.
+        self.assertEqual(bot.client.msg[-1], {'mbody': '<p>test', 'mto': '',})
 
     def test_send_package_method_text(self):
         bot = self.mk_default_bot()

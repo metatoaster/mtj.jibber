@@ -8,6 +8,7 @@ import sys
 from collections import deque
 
 from sleekxmpp import ClientXMPP
+from sleekxmpp.xmlstream import ET
 
 from mtj.jibber.core import BotCore
 from mtj.jibber.core import MucBotCore
@@ -411,5 +412,15 @@ class MucChatBot(MucBotCore):
             reply_html = None
             reply_txt = raw
 
-        self.client.send_message(mto=mto, mbody=reply_txt, mhtml=reply_html,
-            **kwargs)
+        try:
+            self.client.send_message(mto=mto, mbody=reply_txt,
+                mhtml=reply_html, **kwargs)
+        except ET.ParseError:
+            logger.warning(
+                'The following html was to be sent but it is invalid xml'
+                '----------\n%s'
+                '\n----------\n'
+                'retrying with just plain text',
+                reply_html
+            )
+            self.client.send_message(mto=mto, mbody=raw, **kwargs)
