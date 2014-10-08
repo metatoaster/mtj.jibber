@@ -367,7 +367,6 @@ class MucBotTestCase(TestCase):
 
     def test_muc_bot_success_command(self):
         bot = self.mk_default_bot()
-        self.assertEqual(bot.objects[self.test_package].bot, bot)
         bot.run_command({
             'mucnick': 'tester',
             'mucroom': 'testroom',
@@ -389,7 +388,6 @@ class MucBotTestCase(TestCase):
 
     def test_muc_bot_success_command_ignore_self(self):
         bot = self.mk_default_bot()
-        self.assertEqual(bot.objects[self.test_package].bot, bot)
         bot.run_command({
             'mucnick': 'testbot',
             'mucroom': 'testroom',

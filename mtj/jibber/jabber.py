@@ -130,7 +130,6 @@ class MucChatBot(MucBotCore):
             return
 
         obj = cls(**kwargs)
-        obj.bot = self
         if alias is None:
             alias = package
         self.objects[alias] = obj
