@@ -1,6 +1,11 @@
 Changelog
 =========
 
+0.4 - Unreleased
+----------------
+
+- Fully require the ``bot`` argument.
+
 0.3 - 2014-10-08
 ----------------
 
