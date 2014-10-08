@@ -311,13 +311,7 @@ class MucChatBot(MucBotCore):
         for package, method in self.listeners:
             f = getattr(self.objects[package], method)
             try:
-                try:
-                    f(msg=msg, bot=self)
-                except TypeError:  # pragma: no cover
-                    # XXX deprecated
-                    f(msg=msg)
-                    logger.info('%s.%s does not accept the `bot` argument',
-                        package, method)
+                f(msg=msg, bot=self)
             except:
                 logger.exception('Error calling listener')
 
@@ -378,13 +372,7 @@ class MucChatBot(MucBotCore):
             f = getattr(self.objects[package], method)
             msg = kwargs.pop('msg', {})
             match = kwargs.pop('match', None)
-            try:
-                raw_reply = f(msg=msg, match=match, bot=self)
-            except TypeError:
-                raw_reply = f(msg=msg, match=match)
-                # legacy package method definition does not accept bot.
-                logger.info('%s.%s does not accept the `bot` argument',
-                    package, method)
+            raw_reply = f(msg=msg, match=match, bot=self)
         except:
             logger.exception('Failed to send_package_method')
             return

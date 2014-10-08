@@ -375,17 +375,6 @@ class MucBotTestCase(TestCase):
         self.assertEqual(bot.client.msg[0]['mtype'], 'groupchat')
         self.assertEqual(bot.client.msg[0]['mbody'], 'hi tester')
 
-    def test_muc_bot_legacy_command(self):
-        # TODO until the bot argument is required...
-        bot = self.mk_default_bot()
-        bot.run_command({
-            'mucnick': 'tester',
-            'mucroom': 'testroom',
-            'body': 'testbot: legacy',
-        })
-        self.assertEqual(bot.client.msg[0]['mtype'], 'groupchat')
-        self.assertEqual(bot.client.msg[0]['mbody'], 'hi tester')
-
     def test_muc_bot_success_command_ignore_self(self):
         bot = self.mk_default_bot()
         bot.run_command({
