@@ -358,6 +358,7 @@ class MucChatBot(MucBotCore):
         return result
 
     def send_package_method(self, package, method, **kwargs):
+
         def send_raw(raw_reply):
             if not isinstance(raw_reply, dict):
                 logger.error('%s:%s generated a %s in list of raw_reply',
@@ -367,6 +368,12 @@ class MucChatBot(MucBotCore):
             response.update(kwargs)
             response.update(raw_reply)
             self.send_message(**response)
+
+        def send_check(raw_reply):
+            if type(raw_reply) in (str, unicode):
+                self.send_message(raw=raw_reply, **kwargs)
+            elif isinstance(raw_reply, dict):
+                send_raw(raw_reply)
 
         try:
             f = getattr(self.objects[package], method)
@@ -383,13 +390,11 @@ class MucChatBot(MucBotCore):
             logger.exception('Failed to send_package_method')
             return
 
-        if type(raw_reply) in (str, unicode):
-            self.send_message(raw=raw_reply, **kwargs)
-        elif isinstance(raw_reply, dict):
-            send_raw(raw_reply)
-        elif isinstance(raw_reply, list):
+        if isinstance(raw_reply, list):
             for r in raw_reply:
-                send_raw(r)
+                send_check(r)
+        else:
+            send_check(raw_reply)
 
         # reset the timer if it's in timer; this is useful if there
         # exist a command (or other triggers such as timer) triggered

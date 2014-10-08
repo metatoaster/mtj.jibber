@@ -72,3 +72,14 @@ class GreeterCommand(Command, Greeter):
                 'mto': 'trap@example.com',
             },
         ]
+
+    def multiline_spam(self, msg, match=None, bot=None):
+        return [
+            'a set of',
+            'multiple line',
+            'spam',
+            { # also a line of random.
+                'raw': 'test123',
+                'mto': 'beacon@example.com',
+            },
+        ]

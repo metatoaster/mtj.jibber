@@ -259,6 +259,19 @@ class MucBotTestCase(TestCase):
             {'mto': 'trap@example.com', 'mbody': 'posttrap', 'mhtml': None},
         ])
 
+    def test_send_package_method_multiline_spam(self):
+        bot = self.mk_default_bot()
+        bot.send_package_method(
+            'mtj.jibber.testing.command.GreeterCommand', 'multiline_spam',
+             mto='test@example.com')
+        self.assertEqual(bot.client.msg, [
+            {'mto': 'test@example.com', 'mbody': 'a set of', 'mhtml': None},
+            {'mto': 'test@example.com', 'mbody': 'multiple line',
+                'mhtml': None},
+            {'mto': 'test@example.com', 'mbody': 'spam', 'mhtml': None},
+            {'mto': 'beacon@example.com', 'mbody': 'test123', 'mhtml': None},
+        ])
+
     def test_send_package_method_error(self):
         class E(object):
             def fail(self):
