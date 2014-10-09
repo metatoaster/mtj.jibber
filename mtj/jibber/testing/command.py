@@ -11,9 +11,6 @@ class Greeter(object):
 
         return 'hi %(mucnick)s' % msg
 
-    def say_legacy_hi(self, msg, match):
-        return 'hi %(mucnick)s' % msg
-
     def say_hello_all(self, *a, **kw):
         return 'hello all'
 

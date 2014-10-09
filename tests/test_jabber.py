@@ -31,7 +31,6 @@ class MucBotTestCase(TestCase):
         ]
         self.commands = [
             ['^%(nickname)s: hi', 'say_hi'],
-            ['^%(nickname)s: legacy', 'say_legacy_hi'],
             ['^%(nickname)s: hello', 'say_hello_all'],
         ]
         self.schedule = [
