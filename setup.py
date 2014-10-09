@@ -10,7 +10,7 @@ long_description = (
 
 setup(name='mtj.jibber',
       version=version,
-      description="A jabber bot framework.",
+      description="A very easy to use, simple to extend jabber bot framework.",
       long_description=long_description,
       # Get more strings from
       # http://pypi.python.org/pypi?%3Aaction=list_classifiers
@@ -22,6 +22,7 @@ setup(name='mtj.jibber',
         "Programming Language :: Python",
         "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3.3",
+        "Programming Language :: Python :: 3.4",
         "Programming Language :: Python :: Implementation :: PyPy",
         "Topic :: Internet",
         "Topic :: Utilities",

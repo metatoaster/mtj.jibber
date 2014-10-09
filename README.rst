@@ -201,7 +201,10 @@ command:
 
 Oh yeah, you can naturally develop your own modules that do things you
 want your bot to do.  Feel free to use the classes in mtj.jibber.bot as
-your starting point!
+your starting point, and as a further example on how to build a package
+with your custom commands, please take a look at `mtj.jibberext`_.
+
+.. _mtj.jibberext: https://github.com/metatoaster/mtj.jibberext
 
 Server Config
 -------------
