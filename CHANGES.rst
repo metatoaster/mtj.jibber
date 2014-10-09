@@ -5,6 +5,8 @@ Changelog
 ----------------
 
 - Fully require the ``bot`` argument.
+- Other minor cleanup and updated tests.  Test client's clear method now
+  works as intended.
 
 0.3 - 2014-10-08
 ----------------
