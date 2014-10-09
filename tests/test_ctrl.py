@@ -5,6 +5,9 @@ import sys
 from contextlib import contextmanager
 
 from mtj.jibber import ctrl
+from mtj.jibber.jabber import MucChatBot
+
+from mtj.jibber.testing.client import TestClient
 
 
 # mixture of unicode and str in python2.7 version of argparse means that
@@ -152,6 +155,31 @@ class CtrlTestCase(TestCase):
             self.assertRaises(SystemExit, ctrl.main, args,
                 _bot_cls=FakeBot, _cmd_cls=FakeCmd)
             self.assertRaises(ValueError, json.loads, out.items[0])
+
+    def test_config_client_examples(self):
+        """
+        Ensure that the examples in the documentation will work.
+        """
+
+        config = None
+        with capture_stdio() as stdio:
+            in_, out, err = stdio
+            args = ['--gen-config', 'client_example']
+            self.assertRaises(SystemExit, ctrl.main, args,
+                _bot_cls=FakeBot, _cmd_cls=FakeCmd)
+            config = json.loads(out.items[0])
+        bot = MucChatBot()
+        bot.client = TestClient()
+        bot.config = config
+        bot.setup_client()
+        bot.client('Hello bot')
+        self.assertEqual(bot.client.sent[0], 'hi Tester')
+        bot.client('rainbow color!')
+        self.assertTrue(bot.client.sent[1].endswith('!'))
+        bot.client('rainbow colour!')
+        self.assertTrue(bot.client.sent[2].endswith('!'))
+        bot.client('bot: rr')
+        self.assertIn(bot.client.sent[3], ['Tester: click', 'Tester: BOOM'])
 
     def test_cmd(self):
         bot = FakeBot()
