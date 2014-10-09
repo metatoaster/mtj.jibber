@@ -3,7 +3,7 @@ Introduction
 
 mtj.jibber is a package that can be used to streamline the process of
 providing automagical useless bantering onto your friendly neighbourhood
-rooms (multiuser chat or MUCS) on all the Jabber (XMPP) servers.
+rooms (multi-user chat or MUCS) on all the Jabber (XMPP) servers.
 
 It's jibber jabber time.
 
@@ -21,7 +21,7 @@ This is a piece of cake.  Get a virtualenv running, and do this:
 
     $ pip install mtj.jibber
 
-This installs the latest stable released version of this package from
+This installs the latest stable release version of this package from
 the Python Package Index (pypi).  If you wish to do so, you should
 follow the `documentation on that index page`_.
 
@@ -37,7 +37,7 @@ Naturally I will assume you got a virtualenv setup, too:
     $ cd mtj.jibber
     $ python setup.py develop
 
-Of course, in that case you should follow the documentation as listead
+Of course, in that case you should follow the documentation as listed
 in the README.rst found at the root of the source repository.
 
 Quick Start Tutorial
@@ -167,7 +167,7 @@ There is another one that is similar:
         ]
     }
 
-This one is similiar to PickOne, except with the allowance of a chance
+This one is similar to PickOne, except with the allowance of a chance
 which is specified in the first element of the 2-tuple.  The roll is a
 random real number between 0 and 1 inclusive, and thus the matching is
 done by cascading downwards on that list for a match.  Match is done by
