@@ -353,10 +353,6 @@ class MucChatBot(MucBotCore):
     def send_package_method(self, package, method, **kwargs):
 
         def send_raw(raw_reply):
-            if not isinstance(raw_reply, dict):
-                logger.error('%s:%s generated a %s in list of raw_reply',
-                    package, method, raw_reply)
-                return
             response = {}
             response.update(kwargs)
             response.update(raw_reply)
