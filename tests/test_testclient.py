@@ -29,6 +29,11 @@ class TestClientTestCase(TestCase):
     def tearDown(self):
         pass
 
+    def test_client_schedule(self):
+        client = TestClient()
+        client.schedule()
+        # does nothing for now...
+
     def test_muc_bot_success_general(self):
         bot = MucChatBot()
         client = TestClient()
@@ -39,6 +44,9 @@ class TestClientTestCase(TestCase):
 
         client('testbot: hi')
         self.assertEqual(bot.client.sent, ['hi Tester'])
+
+        client._clear()
+        self.assertEqual(bot.client.sent, [])
 
         bot.disconnect()
 

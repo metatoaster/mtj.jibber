@@ -48,7 +48,7 @@ class TestClient(object):
         pass
 
     def _clear(self):
-        self.sent.clear()
+        self.sent = []
 
     def __call__(self, body, **kw):
         msg = {}
