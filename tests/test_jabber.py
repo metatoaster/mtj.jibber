@@ -5,7 +5,7 @@ from sleekxmpp.xmlstream import ET
 from mtj.jibber.jabber import MucChatBot
 
 
-class TestClient(object):
+class DummyClient(object):
     def __init__(self):
         self.msg = []
         self.schedules = []  # for checking all added timers
@@ -75,7 +75,7 @@ class MucBotTestCase(TestCase):
 
     def mk_default_bot(self, config=None, nickname='testbot'):
         bot = MucChatBot()
-        bot.client = TestClient()
+        bot.client = DummyClient()
         bot.nickname = nickname
         bot.config = config or self.config
         bot.setup_packages()
@@ -394,7 +394,7 @@ class MucBotTestCase(TestCase):
 
     def test_muc_bot_fail_not_command(self):
         bot = MucChatBot()
-        bot.client = TestClient()
+        bot.client = DummyClient()
         bot.nickname = 'testbot'
         self.config['packages'][0]['package'] = \
             'mtj.jibber.testing.command.Greeter'
@@ -453,7 +453,7 @@ class MucBotTestCase(TestCase):
 
     def test_muc_bot_construct(self):
         bot = MucChatBot()
-        bot.client = TestClient()
+        bot.client = DummyClient()
         bot.nickname = 'testbot'
         bot.config = self.config
         self.add_kwargs({'arg1': 'test'})
@@ -478,7 +478,7 @@ class MucBotTestCase(TestCase):
 
     def test_muc_bot_single(self):
         bot = MucChatBot()
-        bot.client = TestClient()
+        bot.client = DummyClient()
         bot.nickname = 'testbot'
         bot.config = self.config
         self.add_kwargs({'arg1': 'test'})
@@ -498,7 +498,7 @@ class MucBotTestCase(TestCase):
 
     def test_muc_bot_multimatch(self):
         bot = MucChatBot()
-        bot.client = TestClient()
+        bot.client = DummyClient()
         bot.nickname = 'testbot'
         bot.config = self.config
         self.add_kwargs({'arg1': 'test'})
@@ -518,7 +518,7 @@ class MucBotTestCase(TestCase):
 
     def test_muc_bot_timers(self):
         bot = MucChatBot()
-        bot.client = TestClient()
+        bot.client = DummyClient()
         bot.nickname = 'testbot'
         bot.config = self.config
         bot.setup_packages()
@@ -551,7 +551,7 @@ class MucBotTestCase(TestCase):
 
     def test_muc_bot_timers_multi(self):
         bot = MucChatBot()
-        bot.client = TestClient()
+        bot.client = DummyClient()
         bot.nickname = 'testbot'
         bot.config = {'nickname': 'testbot', 'packages': [
             {'package': self.test_package,
@@ -627,7 +627,7 @@ class MucBotTestCase(TestCase):
 
     def test_muc_bot_listeners_null(self):
         bot = MucChatBot()
-        bot.client = TestClient()
+        bot.client = DummyClient()
         bot.nickname = 'testbot'
         bot.config = {
             'nickname': 'testbot',
