@@ -80,3 +80,6 @@ class GreeterCommand(Command, Greeter):
                 'mto': 'beacon@example.com',
             },
         ]
+
+    def die(self, *a, **kw):
+        raise Exception('desu')

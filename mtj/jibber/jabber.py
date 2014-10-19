@@ -6,6 +6,7 @@ import json
 import random
 import sys
 from collections import deque
+from functools import partial
 
 from sleekxmpp import ClientXMPP
 from sleekxmpp.xmlstream import ET
@@ -99,6 +100,8 @@ class MucChatBot(MucBotCore):
         self.listeners = []
         self.commentators = []
 
+        self.raw_handlers = {}
+
         # can't have zero-sized queue for this, see setup using this
         if not self.commentary_qsize > 0:
             raise ValueError('commentary_qsize must be greater than 0')
@@ -147,6 +150,7 @@ class MucChatBot(MucBotCore):
         self.setup_listeners(package, **configs)
         self.setup_commentators(package, **configs)
         self.setup_timers(package, **configs)
+        self.setup_raw_handlers(package, **configs)
 
     def setup_private_commands(self, package, private_commands=None,
             **configs):
@@ -255,6 +259,17 @@ class MucChatBot(MucBotCore):
                 'specifying the range of possible delays.  Ignored.',
                 seconds.__repr__(), method, package)
 
+    def setup_raw_handlers(self, package, raw_handlers=None, **configs):
+        if not raw_handlers:
+            return
+
+        for event, method_name in raw_handlers.items():
+            if not event in self.raw_handlers:
+                self.raw_handlers[event] = []
+                self.client.add_event_handler(event,
+                    partial(self.run_raw_handler, event))
+            self.raw_handlers[event].append((package, method_name))
+
     def register_timer(self, args):
         try:
             self.client.scheduler.remove(str(args))
@@ -352,6 +367,22 @@ class MucChatBot(MucBotCore):
     def run_timer(self, method, args, kwargs):
         result = method(*args, **kwargs)
         return result
+
+    def run_raw_handler(self, event, msg):
+        # XXX log multiple calls with same msg?
+        # XXX warn for missing event key in raw_handlers?
+        for package, method_names in self.raw_handlers.get(event, {}):
+            for method_name in method_names:
+                f = getattr(self.objects[package], method_name, None)
+                if not f:
+                    logger.error('%s.%s does not exist.',
+                        self.objects[package], method_name)
+                    continue
+                try:
+                    f(msg=msg, bot=self)
+                except:
+                    logger.exception('Error running raw_handler for event %s, '
+                        'in method %s.%s', event, package, method_name)
 
     def send_package_method(self, package, method, **kwargs):
 

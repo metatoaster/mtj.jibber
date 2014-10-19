@@ -3,6 +3,7 @@ from unittest import TestCase
 from sleekxmpp.xmlstream import ET
 
 from mtj.jibber.jabber import MucChatBot
+from mtj.jibber.testing.client import TestClient
 
 
 class DummyClient(object):
@@ -769,3 +770,103 @@ class MucBotTestCase(TestCase):
             return s * c
         result = bot.run_timer(testfunc, ('s',), {'c': 2})
         self.assertEqual(result, 'ss')
+
+    def test_muc_bot_test_raw_handlers_basic(self):
+        bot = MucChatBot()
+        bot.client = TestClient()
+        bot.nickname = 'testbot'
+        bot.config = {
+            'nickname': 'testbot',
+            'commands_max_match': 1,
+            'packages': [
+
+                {
+                    'kwargs': self.kwargs,
+                    'package': 'mtj.jibber.testing.command.GreeterCommand',
+                    'commands': self.commands,
+                    'alias': 'dummy',
+                    'raw_handlers': {
+                        "presence": [
+                            "listener",
+                            "does_not_exist",
+                            "die",
+                        ],
+                    }
+                },
+            ]
+        }
+
+        bot.setup_packages()
+        self.assertEqual(bot.raw_handlers, {
+            'presence': [('dummy', ['listener', 'does_not_exist', 'die',])],
+        })
+
+        self.assertEqual(len(bot.client.events), 1)
+        self.assertEqual(bot.client.events[0][0], 'presence')
+        self.assertTrue(callable(bot.client.events[0][1]))
+
+        # manually trigger the handler
+        bot.client.events[0][1]('msg')
+
+        self.assertEqual(bot.objects['dummy'].listened, ['msg'])
+
+    def test_muc_bot_test_raw_handlers_multi(self):
+        bot = MucChatBot()
+        bot.client = TestClient()
+        bot.nickname = 'testbot'
+        bot.config = {
+            'nickname': 'testbot',
+            'commands_max_match': 1,
+            'packages': [
+
+                {
+                    'kwargs': self.kwargs,
+                    'package': 'mtj.jibber.testing.command.GreeterCommand',
+                    'commands': self.commands,
+                    'alias': 'dummy1',
+                    'raw_handlers': {
+                        "presence": [
+                            "listener",
+                        ],
+                    }
+                },
+
+                {
+                    'kwargs': self.kwargs,
+                    'package': 'mtj.jibber.testing.command.GreeterCommand',
+                    'commands': self.commands,
+                    'alias': 'dummy2',
+                    'raw_handlers': {
+                        "presence": [
+                            "listener",
+                        ],
+                        "connected": [
+                            "listener",
+                        ],
+                    }
+                },
+
+            ]
+        }
+
+        bot.setup_packages()
+        self.assertEqual(bot.raw_handlers, {
+            'presence': [('dummy1', ['listener']), ('dummy2', ['listener'])],
+            'connected': [('dummy2', ['listener'])],
+        })
+
+        self.assertEqual(len(bot.client.events), 2)
+        self.assertEqual(bot.client.events[0][0], 'presence')
+        self.assertTrue(callable(bot.client.events[0][1]))
+        self.assertEqual(bot.client.events[1][0], 'connected')
+        self.assertTrue(callable(bot.client.events[1][1]))
+
+        # manually trigger the handler
+        bot.client.events[0][1]('msg')
+        self.assertEqual(bot.objects['dummy1'].listened, ['msg'])
+        self.assertEqual(bot.objects['dummy2'].listened, ['msg'])
+
+        # manually trigger the handler for the second one.
+        bot.client.events[1][1]('msg')
+        self.assertEqual(len(bot.objects['dummy1'].listened), 1)
+        self.assertEqual(len(bot.objects['dummy2'].listened), 2)
