@@ -333,6 +333,15 @@ class MucBotTestCase(TestCase):
         ])
         self.assertEqual(len(bot.private_commands), 1)
 
+    def test_setup_package_no_kwargs(self):
+        # be lenient, ensure if the package is just defined without
+        # anything will still go through.
+        config = {'nickname': 'testbot', 'packages': [
+            {'package': self.test_package,},
+        ]}
+        bot = self.mk_default_bot(config=config)
+        self.assertEqual(bot.objects.keys(), [self.test_package])
+
     def test_setup_package_alias(self):
         # ensure the default config in this test is what we expect
         config = {'nickname': 'testbot', 'packages': [

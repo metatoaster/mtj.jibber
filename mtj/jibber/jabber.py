@@ -116,7 +116,10 @@ class MucChatBot(MucBotCore):
         for timer in self.timers.keys():
             self.register_timer(timer)
 
-    def setup_package(self, package, kwargs, alias=None, **configs):
+    def setup_package(self, package, kwargs=None, alias=None, **configs):
+        if kwargs is None:
+            kwargs = {}
+
         ns, clsname = package.rsplit('.', 1)
         mod = importlib.import_module(ns)
         # force module reloading.
