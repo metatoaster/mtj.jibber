@@ -341,7 +341,7 @@ class MucBotTestCase(TestCase):
             {'package': self.test_package,},
         ]}
         bot = self.mk_default_bot(config=config)
-        self.assertEqual(bot.objects.keys(), [self.test_package])
+        self.assertEqual(list(bot.objects.keys()), [self.test_package])
 
     def test_setup_package_alias(self):
         # ensure the default config in this test is what we expect
