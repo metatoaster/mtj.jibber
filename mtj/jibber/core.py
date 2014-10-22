@@ -124,6 +124,10 @@ class MucBotCore(BotCore):
     The base jabber bot class.
     """
 
+    def __init__(self, *a, **kw):
+        super(MucBotCore, self).__init__(*a, **kw)
+        self.nickname = None
+
     def make_client(self):
         client = super(MucBotCore, self).make_client()
 

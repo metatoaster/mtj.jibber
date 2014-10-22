@@ -61,8 +61,10 @@ class MucChatBot(MucBotCore):
         self.setup_events(client, [('message', f) for f in
             self.message_handlers])
 
-        # nickname can be undefined, but we need this to check regex.
-        self.nickname = self.config.get('nickname', 'bot')
+        if not self.nickname:
+            # nickname can be undefined if normal client init workflow
+            # is avoided, but we still need this available as a string.
+            self.nickname = self.config.get('nickname') or 'bot'
 
         self._muc_setup = True
 
