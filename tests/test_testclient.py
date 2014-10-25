@@ -33,7 +33,7 @@ class TestClientTestCase(TestCase):
         client = TestClient()
         client.schedule('name', 'a', kw='kw')
         self.assertEqual(client.scheduler, [(('a',), {'kw': 'kw'})])
-        self.assertEqual(client.schedules.keys(), ['name'])
+        self.assertEqual(list(client.schedules.keys()), ['name'])
 
         self.assertRaises(ValueError, client.schedule, 'name', 'a')
 
