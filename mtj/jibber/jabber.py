@@ -13,7 +13,7 @@ from sleekxmpp.xmlstream import ET
 
 from mtj.jibber.core import BotCore
 from mtj.jibber.core import MucBotCore
-from mtj.jibber.core import Command
+from mtj.jibber.core import Handler
 
 from mtj.jibber.utils import strip_tags
 
@@ -129,9 +129,9 @@ class MucChatBot(MucBotCore):
         mod = reload(mod)
         cls = getattr(mod, clsname)
 
-        if not issubclass(cls, Command):
+        if not issubclass(cls, Handler):
             logger.warning(
-                'module `%s` is not a subclass of mtj.jibber.core.Command',
+                'module `%s` is not a subclass of mtj.jibber.core.Handler',
                 package)
             return
 

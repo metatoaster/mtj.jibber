@@ -148,10 +148,24 @@ class MucBotCore(BotCore):
             self.muc.joinMUC(room, self.nickname, wait=True)
 
 
-class Command(object):
+class Handler(object):
     """
-    Core bot command class.
+    Base handler type.
     """
 
     def __init__(self, *a, **kw):
         pass
+
+
+class Command(Handler):
+    """
+    Core bot command class.  Methods defined here that are to be added
+    as package methods for the bot core should take these arguments:
+
+    msg
+        the message stanza
+    match
+        the matched regex groups
+    bot
+        the bot instance that raised this match.
+    """
