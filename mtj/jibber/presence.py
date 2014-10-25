@@ -19,7 +19,24 @@ class Muc(Presence):
 
     def auto_rejoin(self, msg, bot=None, **kw):
         """
-        Auto rejoin immediately when kicked from a muc.
+        Auto rejoin immediately when kicked from a muc.  Typical use
+        case:
+
+        {
+            "package": "mtj.jibber.presence.Muc",
+            "alias": "muc",
+            "kwargs": {
+                "auto_rejoin_timeout": 3
+            },
+            "raw_handlers": {
+                "presence_unavailable": [
+                    "auto_rejoin"
+                ]
+            }
+        }
+
+        Omit the ``auto_rejoin_timeout`` kwargs if immediate rejoin is
+        desired.
         """
 
         if msg['to'] != bot.jid:
