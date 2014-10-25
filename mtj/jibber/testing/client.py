@@ -3,7 +3,7 @@ from collections import namedtuple
 
 logger = logging.getLogger('mtj.jibber.testing')
 
-Jid = namedtuple('Jid', ['user', 'bare'])
+Jid = namedtuple('Jid', ['user', 'bare', 'resource'])
 
 
 class TestClient(object):
@@ -24,7 +24,7 @@ class TestClient(object):
         self.scheduler = []
         self.schedules = {}
 
-        self.boundjid = Jid('Testbot', 'Testbot@example.com')
+        self.boundjid = Jid('Testbot', 'Testbot@example.com', 'Tester')
 
         self.defaults.update(kw)
 

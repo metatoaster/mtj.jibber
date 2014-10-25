@@ -39,12 +39,12 @@ class Muc(Presence):
         desired.
         """
 
-        if msg['to'] != bot.jid:
+        if msg['to'] != bot.jid or msg['from'].resource != bot.nickname:
             # Do nothing, not this bot.
             return
 
-        # no waiting.
         target = msg['from'].bare
+
         if self.auto_rejoin_timeout:
             # using the underlying client class directly as the user
             # likely wants the bot to reconnect even if this object may
@@ -59,5 +59,6 @@ class Muc(Presence):
             except ValueError:
                 logger.warning('Rejoining of %s already scheduled', target)
         else:
+            # no waiting.
             logger.info('Rejoining %s', target)
             bot.muc.joinMUC(target, bot.nickname)
