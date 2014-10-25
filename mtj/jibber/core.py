@@ -169,3 +169,15 @@ class Command(Handler):
     bot
         the bot instance that raised this match.
     """
+
+
+class Presence(Handler):
+    """
+    The presence type.  Should be used for all presence handlers.
+    Arguments for valid methods should follow this:
+
+    msg
+        the presence stanza
+    bot
+        the bot instance that raised this.
+    """
