@@ -64,3 +64,12 @@ class TestClient(object):
             # to also receive the client, output redirection back to
             # here to allow both live and local tests at the same time.
             h(msg)
+
+
+class TestMuc(object):
+
+    def __init__(self, *a, **kw):
+        self.rooms = []
+
+    def joinMUC(self, room, nickname, **kw):
+        self.rooms.append((nickname, room))

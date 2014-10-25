@@ -5,6 +5,7 @@ from mtj.jibber.core import BotCore
 from mtj.jibber.core import MucBotCore
 from mtj.jibber.core import Command
 from mtj.jibber.testing.client import TestClient
+from mtj.jibber.testing.client import TestMuc
 
 
 class BotTestCase(TestCase):
@@ -158,11 +159,6 @@ class MucBotTestCase(TestCase):
         self.assertFalse(bot.muc is None)
 
     def test_join_rooms(self):
-        class TestMuc(object):
-            rooms = []
-            def joinMUC(self, room, nickname, **kw):
-                self.rooms.append((nickname, room))
-
         bot = MucBotCore()
         bot.muc = TestMuc()
         bot.client = TestClient()
@@ -173,7 +169,7 @@ class MucBotTestCase(TestCase):
         }
 
         bot.join_rooms({})
-        self.assertEqual(TestMuc.rooms, [
+        self.assertEqual(bot.muc.rooms, [
             ('tester', 'testroom@chat.example.com'),
             ('tester', 'tester@chat.example.com'),
         ])
