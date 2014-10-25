@@ -31,8 +31,11 @@ class TestClientTestCase(TestCase):
 
     def test_client_schedule(self):
         client = TestClient()
-        client.schedule()
-        # does nothing for now...
+        client.schedule('name', 'a', kw='kw')
+        self.assertEqual(client.scheduler, [(('a',), {'kw': 'kw'})])
+        self.assertEqual(client.schedules.keys(), ['name'])
+
+        self.assertRaises(ValueError, client.schedule, 'name', 'a')
 
     def test_muc_bot_success_general(self):
         bot = MucChatBot()

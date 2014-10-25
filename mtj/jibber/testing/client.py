@@ -22,13 +22,17 @@ class TestClient(object):
         self.groupchat_message_handlers = []
         self.sent = []
         self.scheduler = []
+        self.schedules = {}
 
         self.boundjid = Jid('Testbot',)
 
         self.defaults.update(kw)
 
-    def schedule(self, *a, **kw):
-        pass
+    def schedule(self, name, *a, **kw):
+        if name in self.schedules:
+            raise ValueError
+        self.schedules[name] = (a, kw)
+        self.scheduler.append((a, kw))
 
     def send_message(self, mto, mbody, *a, **kw):
         logger.debug('args = %s', a)
