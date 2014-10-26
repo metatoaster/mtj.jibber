@@ -4,9 +4,17 @@ Changelog
 0.4 - Unreleased
 ----------------
 
-- Fully require the ``bot`` argument.
-- Other minor cleanup and updated tests.  Test client's clear method now
+- Fully require the ``bot`` argument for all methods.
+- Support hooking up handlers to lower level events, making it possible
+  to hook that up via the config file to available module/class paths.
+- First such handler is the automatic rejoin on channel kick.
+- The ``Command`` class is now a sublcass of ``Handler``; that is now
+  the class that will be checked.  In the future we will drop this
+  requirement once validation of argument signature for the provided
+  callables can be done.
+- Test client class now supports scheduling properly; clear method now
   works as intended.
+- Other minor cleanup and updated tests.
 
 0.3 - 2014-10-08
 ----------------
