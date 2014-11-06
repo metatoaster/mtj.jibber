@@ -133,3 +133,38 @@ class PickOne(Command):
         if callable(result):
             return result(msg, match, **kw) % msg
         return result % msg
+
+
+class PercentageChance(Command):
+    """
+    Generates a float between 0-100.
+
+    Accepts a format string to determine response, for example:
+
+        >>> pc = PercentageChance(
+        ...     '%(mucnick)s: We have a %(chance).2f%% chance of survival.')
+        >>> pc.play({'mucnick': 'Tester'}, None)
+        'Tester: We have a ... chance of survival.'
+
+    Of course, if you want him to match some strings provided by the
+    matched input, you can try to install with a regex that contain a
+    named capturing group.
+
+        >>> regexp = re.compile('How likely will it (?P<thing>[\\w\\s]*)')
+        >>> match = regexp.search('How likely will it rain tomorrow?')
+        >>> pc = PercentageChance(
+        ...     '%(mucnick)s: There is a %(chance).2f%% chance it will '
+        ...     '%(thing)s.')
+        >>> pc.play({'mucnick': 'Tester'}, match)
+        'Tester: There is a ... chance it will rain tomorrow.'
+    """
+
+    def __init__(self, template):
+        self.template = template
+
+    def play(self, msg, match, **kw):
+        items = {'chance': random.random() * 100}
+        items.update(msg)
+        if match:
+            items.update(match.groupdict())
+        return self.template % items
