@@ -60,3 +60,44 @@ class PresenceTestCase(TestCase):
             'from': Jid('room', 'room@example.com', 'testbot')
         }, self.bot)
         self.assertEqual(self.bot.muc.rooms, [])
+
+    def test_handle_greeter_greet(self):
+        handler = Muc(greet=['room@example.com/Test Mucnick'])
+        handler.greeter({
+            'to': 'bot@example.com',
+            'from': Jid('room', 'room@example.com', 'Test Mucnick'),
+            'muc': {
+                'role': 'participant',
+            }
+        }, self.bot)
+
+        self.assertEqual(self.bot.client.full_sent, [{
+            'mbody': 'Hello Test Mucnick',
+            'mhtml': None,
+            'mtype': 'groupchat',
+            'mto': 'room@example.com',
+        }])
+
+    def test_handle_greeter_no_greet(self):
+        handler = Muc(greet=['room@example.com/Test Mucnick'])
+        handler.greeter({
+            'to': 'bot@example.com',
+            'from': Jid('room', 'room@example.com', 'Wrong nick'),
+            'muc': {
+                'role': 'participant',
+            }
+        }, self.bot)
+
+        self.assertEqual(self.bot.client.full_sent, [])
+
+    def test_handle_greeter_wrong_role(self):
+        handler = Muc(greet=['room@example.com/Test Mucnick'])
+        handler.greeter({
+            'to': 'bot@example.com',
+            'from': Jid('room', 'room@example.com', 'Test Mucnick'),
+            'muc': {
+                'role': 'what?',
+            }
+        }, self.bot)
+
+        self.assertEqual(self.bot.client.full_sent, [])

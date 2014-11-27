@@ -13,9 +13,17 @@ class Muc(Presence):
 
     def __init__(self,
             auto_rejoin_timeout=0,
+            greet=None,
+            greet_msg='Hello %(name)s',
+            greet_role=['participant'],
         ):
 
         self.auto_rejoin_timeout = auto_rejoin_timeout
+
+        # In the form mucroom@example.com/resource
+        self.greet = set(greet or [])
+        self.greet_msg = greet_msg
+        self.greet_role = greet_role
 
     def auto_rejoin(self, msg, bot=None, **kw):
         """
@@ -62,3 +70,13 @@ class Muc(Presence):
             # no waiting.
             logger.info('Rejoining %s', target)
             bot.muc.joinMUC(target, bot.nickname)
+
+    def greeter(self, msg, bot=None):
+        if not self.greet or not str(msg['from']) in self.greet:
+            return
+
+        if not msg.get('muc').get('role') in self.greet_role:
+            return
+
+        raw = self.greet_msg % {'name': msg['from'].resource}
+        bot.send_message(msg['from'].bare, raw=raw, mtype='groupchat')
