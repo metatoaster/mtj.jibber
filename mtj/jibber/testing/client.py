@@ -3,7 +3,11 @@ from collections import namedtuple
 
 logger = logging.getLogger('mtj.jibber.testing')
 
-Jid = namedtuple('Jid', ['user', 'bare', 'resource'])
+_Jid = namedtuple('Jid', ['user', 'bare', 'resource'])
+
+class Jid(_Jid):
+    def __str__(self):
+        return '%s/%s' % (self.bare, self.resource)
 
 
 class TestClient(object):
@@ -21,6 +25,7 @@ class TestClient(object):
 
         self.groupchat_message_handlers = []
         self.sent = []
+        self.full_sent = []
         self.scheduler = []
         self.schedules = {}
 
@@ -39,6 +44,7 @@ class TestClient(object):
         logger.debug('kwargs = %s', kw)
         logger.info(mbody)
         self.sent.append(mbody)
+        self.full_sent.append(dict(mto=mto, mbody=mbody, **kw))
 
     def register_plugin(self, plugin):
         self.plugins.append(plugin)
