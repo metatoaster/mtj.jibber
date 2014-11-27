@@ -800,6 +800,15 @@ class MucBotTestCase(TestCase):
         self.assertEqual(bot.raw_handlers, {
             'presence': [('dummy', ['listener', 'does_not_exist', 'die',])],
         })
+        self.assertEqual(len(bot.client.events), 1)
+
+        # duplicated setup (result from bot_reinit calls) will not result
+        # in extra handlers registered.
+        bot.setup_packages()
+        self.assertEqual(bot.raw_handlers, {
+            'presence': [('dummy', ['listener', 'does_not_exist', 'die',])],
+        })
+        self.assertEqual(len(bot.client.events), 1)
 
         self.assertEqual(len(bot.client.events), 1)
         self.assertEqual(bot.client.events[0][0], 'presence')

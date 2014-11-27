@@ -70,6 +70,17 @@ class MucChatBot(MucBotCore):
 
         self.setup_packages()
 
+    @property
+    def raw_handlers(self):
+        # XXX this actually should NEVER be cleared since we only want
+        # to keep one instance of the partial that will do the resolving
+        # to the local instance methods.  Moved from setup_packages as
+        # the bot_reinit will call that.
+        result = getattr(self, '_raw_handlers', None)
+        if result is None:
+            result = self._raw_handlers = {}
+        return result
+
     def clear_timers(self):
         """
         Removes _all_ timers from the scheduler.
@@ -102,7 +113,9 @@ class MucChatBot(MucBotCore):
         self.listeners = []
         self.commentators = []
 
-        self.raw_handlers = {}
+        for k in self.raw_handlers.keys():
+            # have to clear the lists, too.
+            self.raw_handlers[k] = []
 
         # can't have zero-sized queue for this, see setup using this
         if not self.commentary_qsize > 0:
