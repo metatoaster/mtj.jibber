@@ -169,7 +169,7 @@ class MucBotTestCase(TestCase):
         }
 
         bot.join_rooms({})
-        self.assertEqual(bot.muc.rooms, [
+        self.assertEqual(bot.muc.joined_rooms, [
             ('tester', 'testroom@chat.example.com'),
             ('tester', 'tester@chat.example.com'),
         ])

@@ -75,7 +75,7 @@ class TestClient(object):
 class TestMuc(object):
 
     def __init__(self, *a, **kw):
-        self.rooms = []
+        self.joined_rooms = []
 
     def joinMUC(self, room, nickname, **kw):
-        self.rooms.append((nickname, room))
+        self.joined_rooms.append((nickname, room))

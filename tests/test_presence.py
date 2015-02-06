@@ -24,7 +24,8 @@ class PresenceTestCase(TestCase):
             'from': Jid('room', 'room@example.com', 'testbot')
         }, self.bot)
 
-        self.assertEqual(self.bot.muc.rooms, [('testbot', 'room@example.com')])
+        self.assertEqual(self.bot.muc.joined_rooms,
+            [('testbot', 'room@example.com')])
 
     def test_handle_rejoin_unrelated(self):
         handler = Muc()
@@ -33,7 +34,7 @@ class PresenceTestCase(TestCase):
             'from': Jid('room', 'room@example.com', 'testbot2') # different
         }, self.bot)
 
-        self.assertEqual(self.bot.muc.rooms, [])
+        self.assertEqual(self.bot.muc.joined_rooms, [])
 
     def test_handle_rejoin_not_bot(self):
         handler = Muc()
@@ -42,7 +43,7 @@ class PresenceTestCase(TestCase):
             'from': Jid('room', 'room@example.com', 'some user')
         }, self.bot)
 
-        self.assertEqual(self.bot.muc.rooms, [])
+        self.assertEqual(self.bot.muc.joined_rooms, [])
 
     def test_handle_rejoin_scheduled(self):
         handler = Muc(auto_rejoin_timeout=10)
@@ -51,7 +52,7 @@ class PresenceTestCase(TestCase):
             'from': Jid('room', 'room@example.com', 'testbot')
         }, self.bot)
 
-        self.assertEqual(self.bot.muc.rooms, [])
+        self.assertEqual(self.bot.muc.joined_rooms, [])
         self.assertIn('Rejoin room@example.com', self.bot.client.schedules)
 
         # no exceptions
@@ -59,7 +60,7 @@ class PresenceTestCase(TestCase):
             'to': 'bot@example.com',
             'from': Jid('room', 'room@example.com', 'testbot')
         }, self.bot)
-        self.assertEqual(self.bot.muc.rooms, [])
+        self.assertEqual(self.bot.muc.joined_rooms, [])
 
     def test_handle_greeter_greet(self):
         handler = Muc(greet=['room@example.com/Test Mucnick'])
