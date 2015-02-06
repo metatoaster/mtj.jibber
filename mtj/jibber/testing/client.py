@@ -25,6 +25,7 @@ class TestClient(object):
 
         self.groupchat_message_handlers = []
         self.sent = []
+        self.raw = []
         self.full_sent = []
         self.scheduler = []
         self.schedules = {}
@@ -38,6 +39,9 @@ class TestClient(object):
             raise ValueError
         self.schedules[name] = (a, kw)
         self.scheduler.append((a, kw))
+
+    def send(self, raw):
+        self.raw.append(raw)
 
     def send_message(self, mto, mbody, *a, **kw):
         logger.debug('args = %s', a)

@@ -2,6 +2,7 @@ import re
 import random
 
 from mtj.jibber.core import Command
+from mtj.jibber import stanza
 
 
 class FakeActions(Command):
@@ -168,3 +169,60 @@ class PercentageChance(Command):
         if match:
             items.update(match.groupdict())
         return self.template % items
+
+
+class MucAdmin(Command):
+    """
+    Provides some basic administration capabilities for a MUC.
+
+    Currently experimental as it pokes into methods exposed by the bot.
+    """
+
+    def __init__(self,
+            success_reason='Requested by moderator',
+            success_msg='%(mucnick)s: Okay, I have kicked %(victim)s for you.',
+            forbidden_reason='Only moderators may kick',
+            allowed_roles=('moderator',),
+        ):
+        self.success_reason = success_reason
+        self.success_msg = success_msg
+        self.forbidden_reason = forbidden_reason
+        self.allowed_roles = allowed_roles
+
+    def admin_kick_nickname(self, msg, match, bot, **kw):
+        """
+        Allow those who have the role in allowed_roles do the kicking,
+        and kick those who are not.
+        """
+
+        room = msg['from'].bare
+        req_nick = msg['from'].resource
+
+        self_role = bot.muc.rooms.get(room, {}).get(bot.nickname,
+            {}).get('role')
+        if self_role != 'moderator':
+            return
+
+        roster = bot.muc.rooms.get(room, {})
+        roster_item = roster.get(req_nick)
+
+        if not roster_item:
+            # warning?
+            return
+
+        if roster_item['role'] not in self.allowed_roles:
+            raw = stanza.admin_query(room, nick=req_nick,
+                reason=self.forbidden_reason)
+            bot.client.send(raw)
+            return
+
+        victim = match.groupdict().get('victim')
+        if not victim or not roster.get(victim):
+            return
+
+        raw = stanza.admin_query(room, nick=victim, reason=self.success_reason)
+        bot.client.send(raw)
+        return self.success_msg % {
+            'mucnick': msg['mucnick'],
+            'victim': victim,
+        }
