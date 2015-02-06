@@ -6,6 +6,7 @@ from sleekxmpp.xmlstream import ET
 
 from mtj.jibber.jabber import MucChatBot
 from mtj.jibber.bot import MucAdmin
+from mtj.jibber.bot import RussianRoulette
 
 from mtj.jibber.testing.client import TestClient
 from mtj.jibber.testing.client import TestMuc
@@ -115,3 +116,32 @@ class MucAdminTestCase(TestCase):
         self.assertEqual(len(bot.client.raw), 1)
         self.assertEqual(result,
             'kicker: Okay, I have kicked a_victim for you.')
+
+
+class TestRussianRoulette(TestCase):
+
+    def setUp(self):
+        pass
+
+    def tearDown(self):
+        pass
+
+    def test_survive(self):
+        rr = RussianRoulette(bullets=0, slots=6)
+        msg = {'mucnick': 'player',}
+        result = rr.play(msg, None, None)
+        self.assertEqual(result,
+            '*click*... it appears player lives another day.')
+
+    def test_death(self):
+        rr = RussianRoulette(bullets=6, slots=6)
+        bot = MucChatBot()
+        bot.client = TestClient()
+        msg = {
+            'mucnick': 'player',
+            'from': Jid('room', 'room@example.com', 'player')
+        }
+
+        result = rr.play(msg, None, bot)
+        self.assertIsNone(result)
+        self.assertEqual(len(bot.client.raw), 1)

@@ -226,3 +226,31 @@ class MucAdmin(Command):
             'mucnick': msg['mucnick'],
             'victim': victim,
         }
+
+
+class RussianRoulette(Command):
+    """
+    Only way to win is not to play.
+    """
+
+    def __init__(self,
+            bullets=5,
+            slots=6,
+            empty_msg='*click*... it appears %(mucnick)s lives another day.',
+            death_msg='*splat*',
+        ):
+        self.bullets = bullets
+        self.slots = slots
+        self.empty_msg = empty_msg
+        self.death_msg = death_msg
+
+    def play(self, msg, match, bot, **kw):
+        spin = random.randint(1, self.slots)
+        if spin > self.bullets:
+            return self.empty_msg % msg
+
+        room = msg['from'].bare
+        nick = msg['mucnick']
+
+        raw = stanza.admin_query(room, nick=nick, reason=self.death_msg)
+        bot.client.send(raw)
