@@ -401,6 +401,31 @@ class MucChatBot(MucBotCore):
 
     def send_package_method(self, package, method, **kwargs):
 
+        try:
+            f = getattr(self.objects[package], method)
+            msg = kwargs.pop('msg', {})
+            match = kwargs.pop('match', None)
+            raw_reply = f(msg=msg, match=match, bot=self)
+        except:
+            logger.exception('Failed to send_package_method')
+            return
+
+        self.process_send_requests(raw_reply, **kwargs)
+
+        # reset the timer if it's in timer; this is useful if there
+        # exist a command (or other triggers such as timer) triggered
+        # this, so that things can be rescheduled.
+        if self.timers.get((package, method)):
+            self.register_timer((package, method))
+
+        return raw_reply
+
+    def process_send_requests(self, raw_reply, **kwargs):
+        """
+        Process the result returned by the package methods.  This will
+        in turn call send_message as appropriate for replies.
+        """
+
         def send_raw(raw_reply):
             response = {}
             response.update(kwargs)
@@ -413,28 +438,11 @@ class MucChatBot(MucBotCore):
             elif isinstance(raw_reply, dict):
                 send_raw(raw_reply)
 
-        try:
-            f = getattr(self.objects[package], method)
-            msg = kwargs.pop('msg', {})
-            match = kwargs.pop('match', None)
-            raw_reply = f(msg=msg, match=match, bot=self)
-        except:
-            logger.exception('Failed to send_package_method')
-            return
-
         if isinstance(raw_reply, list):
             for r in raw_reply:
                 send_check(r)
         else:
             send_check(raw_reply)
-
-        # reset the timer if it's in timer; this is useful if there
-        # exist a command (or other triggers such as timer) triggered
-        # this, so that things can be rescheduled.
-        if self.timers.get((package, method)):
-            self.register_timer((package, method))
-
-        return raw_reply
 
     def send_message(self, mto, raw=None, **kwargs):
         """
