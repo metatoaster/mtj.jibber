@@ -13,6 +13,15 @@ from mtj.jibber.testing.client import TestMuc
 from mtj.jibber.testing.client import Jid
 
 
+def mk_default_bot(config=None, nickname='testbot'):
+    bot = MucChatBot()
+    bot.client = TestClient()
+    bot.nickname = nickname
+    bot.muc = TestMuc()
+    bot.muc.rooms = {}
+    return bot
+
+
 class MucAdminTestCase(TestCase):
 
     def setUp(self):
@@ -22,12 +31,7 @@ class MucAdminTestCase(TestCase):
         pass
 
     def mk_default_bot(self, config=None, nickname='testbot'):
-        bot = MucChatBot()
-        bot.client = TestClient()
-        bot.nickname = nickname
-        bot.muc = TestMuc()
-        bot.muc.rooms = {}
-        return bot
+        return mk_default_bot(config, nickname)
 
     def test_admin_kick_nickname_bot_not_in_room(self):
         bot = self.mk_default_bot()
