@@ -373,9 +373,12 @@ class MucChatBot(MucBotCore):
                 package, method, msg=msg, match=match,
                 mto=msg['mucroom'], mtype='groupchat')
 
+            # XXX will NOT work if a list.  Need to extract the
+            # actual body of the messages.
             if sent_msg:
                 # remember what we said
-                self.commentary.append(sent_msg)
+                if type(sent_msg) in (str, unicode):
+                    self.commentary.append(sent_msg)
                 # and we are done; maximum one commentary for now.
                 break
 
@@ -399,7 +402,8 @@ class MucChatBot(MucBotCore):
                     logger.exception('Error running raw_handler for event %s, '
                         'in method %s.%s', event, package, method_name)
 
-    def send_package_method(self, package, method, **kwargs):
+    def _send_package_method(self, message_processor, package, method,
+            **kwargs):
 
         try:
             f = getattr(self.objects[package], method)
@@ -410,7 +414,7 @@ class MucChatBot(MucBotCore):
             logger.exception('Failed to send_package_method')
             return
 
-        self.process_send_requests(raw_reply, **kwargs)
+        message_processor(raw_reply, **kwargs)
 
         # reset the timer if it's in timer; this is useful if there
         # exist a command (or other triggers such as timer) triggered
@@ -419,6 +423,10 @@ class MucChatBot(MucBotCore):
             self.register_timer((package, method))
 
         return raw_reply
+
+    def send_package_method(self, package, method, **kwargs):
+        return self._send_package_method(self.process_send_requests,
+            package, method, **kwargs)
 
     def process_send_requests(self, raw_reply, **kwargs):
         """
