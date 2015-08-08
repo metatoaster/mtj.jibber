@@ -9,6 +9,7 @@ install:
   - python setup.py develop
 script: 
   - nosetests --with-coverage --cover-package=mtj.jibber --with-doctest --doctest-options=+ELLIPSIS
+sudo: false
 after_success:
   - pip install coveralls
   - coveralls
