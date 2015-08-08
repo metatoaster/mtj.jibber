@@ -1,12 +1,15 @@
 from unittest import TestCase
 
 import re
+from time import time
 
 from sleekxmpp.xmlstream import ET
 
 from mtj.jibber.jabber import MucChatBot
+import mtj.jibber.bot
 from mtj.jibber.bot import MucAdmin
 from mtj.jibber.bot import RussianRoulette
+from mtj.jibber.bot import LastActivity
 
 from mtj.jibber.testing.client import TestClient
 from mtj.jibber.testing.client import TestMuc
@@ -149,3 +152,67 @@ class TestRussianRoulette(TestCase):
         result = rr.play(msg, None, bot)
         self.assertIsNone(result)
         self.assertEqual(len(bot.client.raw), 1)
+
+
+class TestLastActivity(TestCase):
+
+    def setUp(self):
+        self.bot = mk_default_bot()
+        self.bot.muc.rooms = {
+            'room@example.com': {
+                'A Test User': {
+                    'jid': Jid('testbot1', 'testbot1@example.com', 'test1'),
+                    'nick': 'A Test User',
+                },
+                'The Robot': {
+                    'jid': Jid('rob', 'rob@example.com', 'bot'),
+                    'nick': 'The Robot',
+                },
+                'Rob': {
+                    'jid': Jid('rob', 'rob@example.com', 'home'),
+                    'nick': 'Rob',
+                },
+            },
+        }
+
+        self.cmd = LastActivity()
+        self._time = 1500000000
+
+        mtj.jibber.bot.time = self.time
+
+    def tearDown(self):
+        mtj.jibber.bot.time = time
+
+    def time(self):
+        return self._time
+
+    def test_add_all(self):
+        room = 'room@example.com'
+        jid = 'testbot@example.com'
+        nick = 'Test Bot'
+        timestamp = 1400000000
+
+        self.cmd.add_all(room, jid, nick, timestamp)
+        self.assertEqual(self.cmd.nicks, {(room, nick): (jid, timestamp)})
+        self.assertEqual(self.cmd.jids, {(room, jid): (nick, timestamp)})
+
+        timestamp = 1500000000
+
+        self.cmd.add_all(room, jid, nick, timestamp)
+        self.assertEqual(self.cmd.nicks, {(room, nick): (jid, timestamp)})
+        self.assertEqual(self.cmd.jids, {(room, jid): (nick, timestamp)})
+
+    def test_roster_check(self):
+        self.cmd.add_roster(None, None, self.bot)
+
+        # nicks can be fairly deterministic
+        self.assertEqual(self.cmd.nicks, {
+            ('room@example.com', 'A Test User'):
+                ('testbot1@example.com', 1500000000),
+            ('room@example.com', 'The Robot'):
+                ('rob@example.com', 1500000000),
+            ('room@example.com', 'Rob'):
+                ('rob@example.com', 1500000000),
+        })
+        # jids not so much, so we just check that there are 2.
+        self.assertEqual(len(self.cmd.jids), 2)

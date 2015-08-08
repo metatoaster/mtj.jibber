@@ -1,5 +1,6 @@
 import re
 import random
+from time import time
 
 from mtj.jibber.core import Command
 from mtj.jibber import stanza
@@ -254,3 +255,38 @@ class RussianRoulette(Command):
 
         raw = stanza.admin_query(room, nick=nick, reason=self.death_msg)
         bot.client.send(raw)
+
+
+class LastActivity(Command):
+    """
+    This is a base implementation, a more detailed one that includes
+    persistency will be included in mtj.jibberext.
+
+    Can effectively provide the the last seen command typically found in
+    IRC chatrooms when associated with the right triggers.
+    """
+
+    def __init__(self):
+        self.jids = {}
+        self.nicks = {}
+
+    def add_jid(self, room_jid, jid, nick, timestamp):
+        self.jids[(room_jid, jid)] = (nick, timestamp)
+
+    def add_nick(self, room_jid, jid, nick, timestamp):
+        self.nicks[(room_jid, nick)] = (jid, timestamp)
+
+    def add_all(self, room_jid, jid, nick, timestamp):
+        self.add_jid(room_jid, jid, nick, timestamp)
+        self.add_nick(room_jid, jid, nick, timestamp)
+
+    def add_roster(self, msg, match, bot, **kw):
+        """
+        Base activity on roster.  Usage is good for bot's first log-in,
+        or timer based checks.
+        """
+
+        timestamp = int(time())
+        for room, users in bot.muc.rooms.items():
+            for user in users.values():
+                self.add_all(room, user['jid'].bare, user['nick'], timestamp)
