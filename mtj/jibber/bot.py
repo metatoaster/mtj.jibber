@@ -266,7 +266,26 @@ class LastActivity(Command):
     IRC chatrooms when associated with the right triggers.
     """
 
-    def __init__(self):
+    def __init__(self,
+            nick_last_seen='%(mucnick)s: %(nick)s was last seen %(time)s.',
+            nick_is_here='%(mucnick)s: %(nick)s is seen here right now.',
+            nick_never_seen='%(mucnick)s: %(nick)s has never been seen '
+                'here before.',
+            jid_last_seen='%(mucnick)s: %(jid)s was last seen %(time)s.',
+            jid_is_here='%(mucnick)s: %(jid)s is seen here right now.',
+            jid_never_seen='%(mucnick)s: %(jid)s has never been seen '
+                'here before.',
+            ago='%s seconds ago',
+        ):
+
+        self.nick_last_seen = nick_last_seen
+        self.nick_is_here = nick_is_here
+        self.nick_never_seen = nick_never_seen
+        self.jid_last_seen = jid_last_seen
+        self.jid_is_here = jid_is_here
+        self.jid_never_seen = jid_never_seen
+        self.ago = ago
+
         self.jids = {}
         self.nicks = {}
 
@@ -290,3 +309,63 @@ class LastActivity(Command):
         for room, users in bot.muc.rooms.items():
             for user in users.values():
                 self.add_all(room, user['jid'].bare, user['nick'], timestamp)
+
+    def format_ago(self, timestamp):
+        """
+        Subclasses can format this to their liking.
+        """
+
+        now = int(time())
+        return self.ago % (now - timestamp)
+
+    def report_nick(self, msg, match, bot, **kw):
+        """
+        Report last activity by nickname.
+        """
+
+        room_jid = msg['from'].bare
+        mucnick = msg['from'].resource
+        nick = match.group('nick')
+        # check if the nickname is in the same room as the user making
+        # the request
+        if bot.muc.rooms.get(room_jid, {}).get(nick):
+            return self.nick_is_here % {'nick': nick,
+                'mucnick': mucnick}
+        # grab an info otherwise
+        info = self.nicks.get((room_jid, nick))
+        if not info:
+            return self.nick_never_seen % {'nick': nick,
+                'mucnick': mucnick}
+        jid, timestamp = info
+        return self.nick_last_seen % {
+            'jid': jid,
+            'nick': nick,
+            'mucnick': mucnick,
+            'time': self.format_ago(timestamp),
+        }
+
+    def report_jid(self, msg, match, bot, **kw):
+        """
+        Report last activity by jid.
+        """
+
+        room_jid = msg['from'].bare
+        mucnick = msg['from'].resource
+        jid = match.group('jid')
+        # check if the jid is in the same room as the user making
+        # the request
+        if jid in (v['jid'].bare for v in bot.muc.rooms[room_jid].values()):
+            return self.jid_is_here % {'jid': jid,
+                'mucnick': mucnick}
+        # grab an info otherwise
+        info = self.jids.get((room_jid, jid))
+        if not info:
+            return self.jid_never_seen % {'jid': jid,
+                'mucnick': mucnick}
+        nick, timestamp = info
+        return self.jid_last_seen % {
+            'jid': jid,
+            'nick': nick,
+            'mucnick': mucnick,
+            'time': self.format_ago(timestamp),
+        }

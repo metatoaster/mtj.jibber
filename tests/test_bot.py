@@ -216,3 +216,65 @@ class TestLastActivity(TestCase):
         })
         # jids not so much, so we just check that there are 2.
         self.assertEqual(len(self.cmd.jids), 2)
+
+    def test_report_nick_not_found(self):
+        self.cmd.add_roster(None, None, self.bot)
+        msg = {'from': Jid('room', 'room@example.com', 'Rob')}
+        match = re.search('!seen (?P<nick>.*)', '!seen Nobody')
+        result = self.cmd.report_nick(msg, match, self.bot)
+        self.assertEqual(result,
+            'Rob: Nobody has never been seen here before.')
+
+    def test_report_nick_found(self):
+        self.cmd.add_roster(None, None, self.bot)
+        msg = {'from': Jid('room', 'room@example.com', 'Rob')}
+        match = re.search('!seen (?P<nick>.*)', '!seen A Test User')
+        result = self.cmd.report_nick(msg, match, self.bot)
+        self.assertEqual(result,
+            'Rob: A Test User is seen here right now.')
+
+    def test_report_nick_last_seen(self):
+        room = 'room@example.com'
+        jid = 'lurker@example.com'
+        nick = 'Lurker'
+        timestamp = 1400000000
+
+        self.cmd.add_all(room, jid, nick, timestamp)
+        self.cmd.add_roster(None, None, self.bot)
+
+        msg = {'from': Jid('room', 'room@example.com', 'Rob')}
+        match = re.search('!seen (?P<nick>.*)', '!seen Lurker')
+        result = self.cmd.report_nick(msg, match, self.bot)
+        self.assertEqual(result,
+            'Rob: Lurker was last seen 100000000 seconds ago.')
+
+    def test_report_jid_not_found(self):
+        self.cmd.add_roster(None, None, self.bot)
+        msg = {'from': Jid('room', 'room@example.com', 'Rob')}
+        match = re.search('!seen (?P<jid>.*)', '!seen nobody@example.com')
+        result = self.cmd.report_jid(msg, match, self.bot)
+        self.assertEqual(result,
+            'Rob: nobody@example.com has never been seen here before.')
+
+    def test_report_jid_found(self):
+        self.cmd.add_roster(None, None, self.bot)
+        msg = {'from': Jid('room', 'room@example.com', 'Rob')}
+        match = re.search('!seen (?P<jid>.*)', '!seen testbot1@example.com')
+        result = self.cmd.report_jid(msg, match, self.bot)
+        self.assertEqual(result,
+            'Rob: testbot1@example.com is seen here right now.')
+
+    def test_report_jid_last_seen(self):
+        room = 'room@example.com'
+        jid = 'lurker@example.com'
+        nick = 'Lurker'
+        timestamp = 1400000000
+
+        self.cmd.add_all(room, jid, nick, timestamp)
+        self.cmd.add_roster(None, None, self.bot)
+
+        msg = {'from': Jid('room', 'room@example.com', 'Rob')}
+        match = re.search('!seen (?P<jid>.*)', '!seen lurker@example.com')
+        result = self.cmd.report_jid(msg, match, self.bot)
+        self.assertEqual(result,
+            'Rob: lurker@example.com was last seen 100000000 seconds ago.')
