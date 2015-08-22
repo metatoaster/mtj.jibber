@@ -88,6 +88,7 @@ class MucAdminTestCase(TestCase):
         }
         self.muc_admin.admin_kick_nickname(msg, match, bot)
         self.assertEqual(len(bot.client.raw), 1)
+        self.assertIn('Only moderators may kick', str(bot.client.raw[0]))
         self.assertEqual(bot.client.raw[0]['to'], 'room@example.com')
 
     def test_admin_kick_nickname_victim_missing(self):
@@ -121,6 +122,7 @@ class MucAdminTestCase(TestCase):
         }
         result = self.muc_admin.admin_kick_nickname(msg, match, bot)
         self.assertEqual(len(bot.client.raw), 1)
+        self.assertIn('Requested by moderator', str(bot.client.raw[0]))
         self.assertEqual(result,
             'kicker: Okay, I have kicked a_victim for you.')
 

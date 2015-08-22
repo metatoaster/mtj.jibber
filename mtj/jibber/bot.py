@@ -212,21 +212,22 @@ class MucAdmin(Command):
             return
 
         if roster_item['role'] not in self.allowed_roles:
-            raw = stanza.admin_query(room, nick=req_nick,
-                reason=self.forbidden_reason)
-            bot.client.send(raw)
+            self._muckick(bot, room, req_nick, self.forbidden_reason)
             return
 
         victim = match.groupdict().get('victim')
         if not victim or not roster.get(victim):
             return
 
-        raw = stanza.admin_query(room, nick=victim, reason=self.success_reason)
-        bot.client.send(raw)
+        self._muckick(bot, room, victim, self.success_reason)
         return self.success_msg % {
             'mucnick': msg['mucnick'],
             'victim': victim,
         }
+
+    def _muckick(self, bot, room, nickname, reason):
+        raw = stanza.admin_query(room, nick=nickname, reason=reason)
+        bot.client.send(raw)
 
 
 class RussianRoulette(Command):
