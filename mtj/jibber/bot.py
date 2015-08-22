@@ -310,6 +310,18 @@ class LastActivity(Command):
             for user in users.values():
                 self.add_all(room, user['jid'].bare, user['nick'], timestamp)
 
+    def message_recorder(self, msg, match, bot, **kw):
+        """
+        Record a message.  Doesn't actually record the content of the
+        message but just log down the entry.
+        """
+
+        room = msg['from'].bare
+        nick = msg['from'].resource
+        jid = bot.muc.rooms[room][nick]['jid'].bare
+        timestamp = int(time())
+        self.add_all(room, jid, nick, timestamp)
+
     def format_ago(self, timestamp):
         """
         Subclasses can format this to their liking.

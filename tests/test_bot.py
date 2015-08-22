@@ -202,6 +202,22 @@ class TestLastActivity(TestCase):
         self.assertEqual(self.cmd.nicks, {(room, nick): (jid, timestamp)})
         self.assertEqual(self.cmd.jids, {(room, jid): (nick, timestamp)})
 
+    def test_message_recorder(self):
+        room = 'room@example.com'
+        jid = 'rob@example.com'
+        nick = 'Rob'
+        timestamp = 1500000000
+        msg = {'from': Jid('room', 'room@example.com', 'Rob')}
+        self.cmd.message_recorder(msg, None, self.bot)
+        self.assertEqual(self.cmd.nicks, {(room, nick): (jid, timestamp)})
+        self.assertEqual(self.cmd.jids, {(room, jid): (nick, timestamp)})
+
+        timestamp = self._time = 1600000000
+        self.cmd.add_all(room, jid, nick, timestamp)
+        self.cmd.message_recorder(msg, None, self.bot)
+        self.assertEqual(self.cmd.nicks, {(room, nick): (jid, timestamp)})
+        self.assertEqual(self.cmd.jids, {(room, jid): (nick, timestamp)})
+
     def test_roster_check(self):
         self.cmd.add_roster(None, None, self.bot)
 
