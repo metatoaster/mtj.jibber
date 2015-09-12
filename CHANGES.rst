@@ -1,7 +1,7 @@
 Changelog
 =========
 
-0.4 - Unreleased
+0.4 - 2015-09-12
 ----------------
 
 - Fully require the ``bot`` argument for all methods.
@@ -18,7 +18,8 @@ Changelog
   be dropped once validation of argument signature for the provided
   callables can be done.
 - A ``LastActivity`` feature; can be used as a ``!seen`` trigger to
-  get back a rough idea on when the user was last seen.
+  get back a rough idea on when the user was last seen.  This intends to
+  be a demo implementation.
 - Test client class now supports scheduling properly; clear method now
   works as intended.
 - Other minor cleanup and updated tests.
