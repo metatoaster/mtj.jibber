@@ -1,5 +1,6 @@
 import logging
 from functools import partial
+import re
 
 from mtj.jibber.core import Presence
 
@@ -13,17 +14,9 @@ class Muc(Presence):
 
     def __init__(self,
             auto_rejoin_timeout=0,
-            greet=None,
-            greet_msg='Hello %(name)s',
-            greet_role=['participant'],
         ):
 
         self.auto_rejoin_timeout = auto_rejoin_timeout
-
-        # In the form mucroom@example.com/resource
-        self.greet = set(greet or [])
-        self.greet_msg = greet_msg
-        self.greet_role = greet_role
 
     def auto_rejoin(self, msg, bot=None, **kw):
         """
@@ -71,12 +64,50 @@ class Muc(Presence):
             logger.info('Rejoining %s', target)
             bot.muc.joinMUC(target, bot.nickname)
 
+
+class MucGreeter(Presence):
+    """
+    A basic greeter, most basic case:
+
+    {
+        "package": "mtj.jibber.presence.MucGreeter",
+        "alias": "mucgreeter",
+        "kwargs": {},
+        "raw_handlers": {
+            "presence_available": [
+                "greeter"
+            ]
+        }
+    }
+    """
+
+
+    def __init__(self,
+            greet_muc=None,
+            greet_nick=None,
+            greet_msg='Hello %(nick)s',
+            greet_role='participant',
+        ):
+
+        # In the form mucroom@example.com/resource
+        self.greet_muc = greet_muc and re.compile(greet_muc)
+        self.greet_nick = greet_nick and re.compile(greet_nick)
+        self.greet_msg = greet_msg
+        self.greet_role = greet_role
+
     def greeter(self, msg, bot=None):
-        if not self.greet or not str(msg['from']) in self.greet:
+        nick = msg['from'].resource
+        room = msg['from'].bare
+
+        # Given patterns for the next two fields, no match, no greet
+        if self.greet_muc and not self.greet_muc.search(room):
+            return
+        if self.greet_nick and not self.greet_nick.search(nick):
             return
 
-        if not msg.get('muc').get('role') in self.greet_role:
+        # Only greet one specific role.
+        if not msg.get('muc').get('role') == self.greet_role:
             return
 
-        raw = self.greet_msg % {'name': msg['from'].resource}
-        bot.send_message(msg['from'].bare, raw=raw, mtype='groupchat')
+        raw = self.greet_msg % {'nick': nick}
+        bot.send_message(room, raw=raw, mtype='groupchat')

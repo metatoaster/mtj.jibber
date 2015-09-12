@@ -1,13 +1,14 @@
 from unittest import TestCase
 
 from mtj.jibber.presence import Muc
+from mtj.jibber.presence import MucGreeter
 from mtj.jibber.jabber import MucChatBot
 from mtj.jibber.testing.client import TestClient
 from mtj.jibber.testing.client import TestMuc
 from mtj.jibber.testing.client import Jid
 
 
-class PresenceTestCase(TestCase):
+class MucTestCase(TestCase):
 
     def setUp(self):
         bot = MucChatBot()
@@ -62,8 +63,22 @@ class PresenceTestCase(TestCase):
         }, self.bot)
         self.assertEqual(self.bot.muc.joined_rooms, [])
 
+
+class MucGreeterTestCase(TestCase):
+
+    def setUp(self):
+        bot = MucChatBot()
+        bot.jid = 'bot@example.com'
+        bot.client = TestClient()
+        bot.nickname = 'testbot'
+        bot.muc = TestMuc()
+        self.bot = bot
+
     def test_handle_greeter_greet(self):
-        handler = Muc(greet=['room@example.com/Test Mucnick'])
+        handler = MucGreeter(
+            greet_muc='room@example.com',
+            greet_nick='Test Mucnick',
+        )
         handler.greeter({
             'to': 'bot@example.com',
             'from': Jid('room', 'room@example.com', 'Test Mucnick'),
@@ -80,7 +95,10 @@ class PresenceTestCase(TestCase):
         }])
 
     def test_handle_greeter_no_greet(self):
-        handler = Muc(greet=['room@example.com/Test Mucnick'])
+        handler = MucGreeter(
+            greet_muc='room@example.com',
+            greet_nick='Test Mucnick',
+        )
         handler.greeter({
             'to': 'bot@example.com',
             'from': Jid('room', 'room@example.com', 'Wrong nick'),
@@ -92,7 +110,10 @@ class PresenceTestCase(TestCase):
         self.assertEqual(self.bot.client.full_sent, [])
 
     def test_handle_greeter_wrong_role(self):
-        handler = Muc(greet=['room@example.com/Test Mucnick'])
+        handler = MucGreeter(
+            greet_muc='room@example.com',
+            greet_nick='Test Mucnick',
+        )
         handler.greeter({
             'to': 'bot@example.com',
             'from': Jid('room', 'room@example.com', 'Test Mucnick'),
