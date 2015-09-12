@@ -79,6 +79,22 @@ class MucGreeter(Presence):
             ]
         }
     }
+
+    A bit more advance case will restrict to specific nicknames, which
+    are implemented as patterns.
+
+    {
+        "package": "mtj.jibber.presence.MucGreeter",
+        "alias": "mucgreeter",
+        "kwargs": {
+            "greet_nick": "^Tester",
+        },
+        "raw_handlers": {
+            "presence_available": [
+                "greeter"
+            ]
+        }
+    }
     """
 
 

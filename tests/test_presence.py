@@ -94,6 +94,42 @@ class MucGreeterTestCase(TestCase):
             'mto': 'room@example.com',
         }])
 
+    def test_handle_greeter_greet_regex(self):
+        handler = MucGreeter(
+            greet_muc='room@example.com',
+            greet_nick='^Test',
+        )
+
+        handler.greeter({
+            'to': 'bot@example.com',
+            'from': Jid('room', 'room@example.com', 'Test Mucnick'),
+            'muc': {
+                'role': 'participant',
+            }
+        }, self.bot)
+
+        self.assertEqual(self.bot.client.full_sent, [{
+            'mbody': 'Hello Test Mucnick',
+            'mhtml': None,
+            'mtype': 'groupchat',
+            'mto': 'room@example.com',
+        }])
+
+        handler.greeter({
+            'to': 'bot@example.com',
+            'from': Jid('room', 'room@example.com', 'Tester'),
+            'muc': {
+                'role': 'participant',
+            }
+        }, self.bot)
+
+        self.assertEqual(self.bot.client.full_sent[1], {
+            'mbody': 'Hello Tester',
+            'mhtml': None,
+            'mtype': 'groupchat',
+            'mto': 'room@example.com',
+        })
+
     def test_handle_greeter_no_greet(self):
         handler = MucGreeter(
             greet_muc='room@example.com',
