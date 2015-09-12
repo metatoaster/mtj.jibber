@@ -87,7 +87,7 @@ class MucGreeter(Presence):
         "package": "mtj.jibber.presence.MucGreeter",
         "alias": "mucgreeter",
         "kwargs": {
-            "greet_nick": "^Tester",
+            "greet_nick": "^Tester"
         },
         "raw_handlers": {
             "presence_available": [
