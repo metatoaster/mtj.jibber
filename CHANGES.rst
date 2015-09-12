@@ -7,11 +7,18 @@ Changelog
 - Fully require the ``bot`` argument for all methods.
 - Support hooking up handlers to lower level events, making it possible
   to hook that up via the config file to available module/class paths.
-- First such handler is the automatic rejoin on channel kick.
-- The ``Command`` class is now a sublcass of ``Handler``; that is now
-  the class that will be checked.  In the future we will drop this
-  requirement once validation of argument signature for the provided
+  This is implemented in the ``presence`` module.
+- For the mean time ``Presence`` is the new base ``Handler`` for the
+  lower level events.
+- First such handler is the automatic rejoin when bot is no longer in
+  a channel, implemented in the ``Muc`` class.
+- Another one is greeter, implemented in the ``MucGreeter`` class.
+- The ``Command`` class is now a subclass of ``Handler``; that is now
+  the class that will be checked.  In the future this requirement may
+  be dropped once validation of argument signature for the provided
   callables can be done.
+- A ``LastActivity`` feature; can be used as a ``!seen`` trigger to
+  get back a rough idea on when the user was last seen.
 - Test client class now supports scheduling properly; clear method now
   works as intended.
 - Other minor cleanup and updated tests.
