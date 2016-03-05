@@ -258,6 +258,55 @@ class RussianRoulette(Command):
         bot.client.send(raw)
 
 
+class RandomPromotion(Command):
+    """
+    Get the bot to do random promotion, one user at a time.
+    """
+
+    def __init__(self,
+            room=None,
+            min_time=43200,
+            max_time=86400,
+        ):
+        self.room = room
+        self.min_time = min_time
+        self.max_time = max_time
+        self.last_mod = None
+        self.timelimit = 0
+
+    def play(self, msg, match, bot, **kw):
+        """
+        Should be done within a timer.
+        """
+
+        if time() < self.timelimit:
+            # Don't do anything until the agreed upon time.
+            return
+
+        # Set the time limit first.
+        limit = random.randint(self.min_time, self.max_time)
+        self.timelimit = int(time()) + limit
+
+        if self.last_mod:
+            # de-mod the last guy
+            bot.client.send(stanza.admin_query(
+                self.room, nick=self.last_mod, role='participant'))
+
+        participants = [
+            nick for nick, details in bot.muc.rooms.get(self.room, {}).items()
+            if details.get('role') == 'participant'
+        ]
+
+        if not participants:
+            # no one to play with
+            return
+
+        # make that new mod
+        self.last_mod = random.choice(participants)
+        bot.client.send(stanza.admin_query(
+            self.room, nick=self.last_mod, role='moderator'))
+
+
 class LastActivity(Command):
     """
     This is a base implementation, a more detailed one that includes

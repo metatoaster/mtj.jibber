@@ -9,6 +9,7 @@ from mtj.jibber.jabber import MucChatBot
 import mtj.jibber.bot
 from mtj.jibber.bot import MucAdmin
 from mtj.jibber.bot import RussianRoulette
+from mtj.jibber.bot import RandomPromotion
 from mtj.jibber.bot import LastActivity
 
 from mtj.jibber.testing.client import TestClient
@@ -154,6 +155,72 @@ class TestRussianRoulette(TestCase):
         result = rr.play(msg, None, bot)
         self.assertIsNone(result)
         self.assertEqual(len(bot.client.raw), 1)
+
+
+class TestRandomPromotion(TestCase):
+
+    def setUp(self):
+        self.bot = mk_default_bot()
+
+        self._time = 100000
+        mtj.jibber.bot.time = self.time
+
+    def tearDown(self):
+        mtj.jibber.bot.time = time
+
+    def time(self):
+        return self._time
+
+    def assertNickRole(self, msg, nick, role):
+        items = dict(msg.getPayload()[0].getchildren()[0].items())
+        self.assertTrue(items['nick'].startswith(nick))
+        self.assertEqual(items['role'], role)
+        return items['nick']
+
+    def test_timers_empty_room_advances(self):
+        rp = RandomPromotion(room='room@example.com', min_time=2, max_time=2)
+        rp.play(None, None, self.bot)
+        self.assertEqual(rp.timelimit, 100002)
+        # Assert not advanced yet
+        self._time = 100001
+        rp.play(None, None, self.bot)
+        self.assertEqual(rp.timelimit, 100002)
+        self._time = 100005
+        rp.play(None, None, self.bot)
+        self.assertEqual(rp.timelimit, 100007)
+
+    def test_empty_room_no_messages(self):
+        rp = RandomPromotion(room='room@example.com', min_time=2, max_time=2)
+        rp.play(None, None, self.bot)
+        # No messages sent for empty room.
+        self.assertEqual(len(self.bot.client.raw), 0)
+
+    def test_standard_workflow(self):
+        self.bot.muc.rooms = {
+            'room@example.com': {
+                'testbot': {'role': 'moderator',},
+                'user1': {'role': 'participant',},
+                'user2': {'role': 'participant',},
+            },
+        }
+
+        rp = RandomPromotion(room='room@example.com', min_time=2, max_time=2)
+        rp.play(None, None, self.bot)
+        # One message was generated.
+        self.assertEqual(len(self.bot.client.raw), 1)
+        msg = self.bot.client.raw[0]
+        # keep last nick
+        last_nick = self.assertNickRole(msg, 'user', 'moderator')
+
+        self._time = 100005
+        rp.play(None, None, self.bot)
+        # Two more - mod removal and addition
+        self.assertEqual(len(self.bot.client.raw), 3)
+        msg = self.bot.client.raw[1]
+        # ensure the last nickname was demod
+        self.assertNickRole(msg, last_nick, 'participant')
+        msg = self.bot.client.raw[2]
+        last_nick = self.assertNickRole(msg, 'user', 'moderator')
 
 
 class TestLastActivity(TestCase):
