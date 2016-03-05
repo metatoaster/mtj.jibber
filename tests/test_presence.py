@@ -145,6 +145,21 @@ class MucGreeterTestCase(TestCase):
 
         self.assertEqual(self.bot.client.full_sent, [])
 
+    def test_handle_greeter_no_greet_muc(self):
+        handler = MucGreeter(
+            greet_muc='room@example.com',
+            greet_nick='Test Mucnick',
+        )
+        handler.greeter({
+            'to': 'bot@example.com',
+            'from': Jid('kitchen', 'kitchen@example.com', 'Test Mucnick'),
+            'muc': {
+                'role': 'participant',
+            }
+        }, self.bot)
+
+        self.assertEqual(self.bot.client.full_sent, [])
+
     def test_handle_greeter_wrong_role(self):
         handler = MucGreeter(
             greet_muc='room@example.com',
