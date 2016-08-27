@@ -1,6 +1,15 @@
 Changelog
 =========
 
+0.5 - Unreleased
+----------------
+
+- Provide Affilate Command base class which can serve as the base for
+  providing moderation/role handling features
+- Use Affiliate class to provide a RandomPromotion class which does what
+  the name suggests.
+- Added some more mock values to the test client in debug mode.
+
 0.4 - 2015-09-12
 ----------------
 
