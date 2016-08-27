@@ -258,7 +258,31 @@ class RussianRoulette(Command):
         bot.client.send(raw)
 
 
-class RandomPromotion(Command):
+class Affilate(Command):
+    """
+    Affilation base command, for commands that want to affilate roles.
+    """
+
+    def __init__(
+            self,
+            promote_to='moderator',
+            demote_to='participant',
+        ):
+        self.promote_to = promote_to
+        self.demote_to = demote_to
+
+    @classmethod
+    def affiliate(cls, bot, room, nick, role):
+        bot.client.send(stanza.admin_query(room, nick, role=role))
+
+    def promote(self, bot, room, nick):
+        self.affiliate(bot, room, nick, self.promote_to)
+
+    def demote(self, bot, room, nick):
+        self.affiliate(bot, room, nick, self.demote_to)
+
+
+class RandomPromotion(Affilate):
     """
     Get the bot to do random promotion, one user at a time.
     """
@@ -267,7 +291,11 @@ class RandomPromotion(Command):
             room=None,
             min_time=43200,
             max_time=86400,
+            promote_to='moderator',
+            demote_to='participant',
+            *a, **kw
         ):
+        super(RandomPromotion, self).__init__(*a, **kw)
         self.room = room
         self.min_time = min_time
         self.max_time = max_time
@@ -288,9 +316,7 @@ class RandomPromotion(Command):
         self.timelimit = int(time()) + limit
 
         if self.last_mod:
-            # de-mod the last guy
-            bot.client.send(stanza.admin_query(
-                self.room, nick=self.last_mod, role='participant'))
+            self.demote(bot, self.room, self.last_mod)
 
         participants = [
             nick for nick, details in bot.muc.rooms.get(self.room, {}).items()
@@ -303,8 +329,7 @@ class RandomPromotion(Command):
 
         # make that new mod
         self.last_mod = random.choice(participants)
-        bot.client.send(stanza.admin_query(
-            self.room, nick=self.last_mod, role='moderator'))
+        self.promote(bot, self.room, self.last_mod)
 
 
 class LastActivity(Command):
