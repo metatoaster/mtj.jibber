@@ -54,9 +54,11 @@ class JibberCmd(cmd.Cmd):
                 return
 
             from mtj.jibber.testing.client import TestClient
+            from mtj.jibber.testing.client import TestMuc
             self.bot.client = TestClient()
+            self.bot.muc = self.bot.client.muc
             self.bot.setup_client()
-            console.locals[b'client'] = self.bot.client
+            console.locals['client'] = self.bot.client
             print("Test client ready; call client('Hello bot') to interact.")
 
         def bot_reinit():

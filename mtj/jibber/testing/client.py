@@ -5,6 +5,10 @@ logger = logging.getLogger('mtj.jibber.testing')
 
 _Jid = namedtuple('Jid', ['user', 'bare', 'resource'])
 
+test_room = "testroom@chat.example.com"
+nickname = "Tester"
+
+
 class Jid(_Jid):
     def __str__(self):
         return '%s/%s' % (self.bare, self.resource)
@@ -18,10 +22,6 @@ class TestClient(object):
     def __init__(self, *a, **kw):
         self.plugins = []
         self.events = []
-        self.defaults = {
-            'mucnick': "Tester",
-            'mucroom': "testroom@chat.example.com",
-        }
 
         self.groupchat_message_handlers = []
         self.sent = []
@@ -30,9 +30,17 @@ class TestClient(object):
         self.scheduler = []
         self.schedules = {}
 
-        self.boundjid = Jid('Testbot', 'Testbot@example.com', 'Tester')
+        self.boundjid = Jid('testbot', 'testbot@example.com', 'Tester')
+
+        self.defaults = {
+            'mucnick': nickname,
+            'mucroom': test_room,
+            'from': Jid('testroom', test_room, nickname),
+        }
 
         self.defaults.update(kw)
+        self.muc = TestMuc()
+        self.muc.joinMUC(test_room, nickname, jid=self.boundjid)
 
     def schedule(self, name, *a, **kw):
         if name in self.schedules:
@@ -80,6 +88,15 @@ class TestMuc(object):
 
     def __init__(self, *a, **kw):
         self.joined_rooms = []
+        self.rooms = {
+            test_room: {},
+        }
 
-    def joinMUC(self, room, nickname, **kw):
+    def joinMUC(self, room, nickname, jid=None, **kw):
+        # jid isn't in API, but for mock values for the TestClient.
+        jid = jid or Jid('user', 'user@chat.example.com', nickname)
         self.joined_rooms.append((nickname, room))
+        room_dict = self.rooms[room] = self.rooms.get(room, {})
+        nick_dict = room_dict[nickname] = room_dict.get(nickname, {})
+        nick_dict['jid'] = jid
+        nick_dict['jidfull'] = str(jid)
